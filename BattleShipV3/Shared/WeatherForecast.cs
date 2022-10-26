@@ -1,4 +1,4 @@
-﻿namespace BattleShipV3.Shared
+namespace BattleShipV3.Shared
 {
     public class WeatherForecast
     {

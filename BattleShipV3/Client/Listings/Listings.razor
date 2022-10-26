@@ -1,0 +1,63 @@
+﻿@page "/listings"
+
+@using Radzen.Blazor
+@using MudBlazor
+@using Models
+
+@inject ToastService toastService
+
+<h3>Match Listings</h3>
+
+@*<RadzenDataGrid @ref="Grid" TItem="Listing" AllowPaging="true" PageSize="3">
+    <Columns>
+        <RadzenDataGridColumn TItem="Listing" Title="From" Property="EloFrom"/>
+
+        <RadzenDataGridColumn TItem="Listing" Title="To" Property="EloTo"/>
+
+        <RadzenDataGridColumn TItem="Listing" Title="Name" Property="Name"/>
+    </Columns>
+</RadzenDataGrid>
+*@
+<MudGrid Spacing="0" Justify="@Justify.Center">
+    <MudItem xs="1">
+        <MudPaper Class="d-block pa-2 mud-theme-primary" Height="paperHeight">Elo from</MudPaper>
+    </MudItem>
+
+    <MudItem xs="1">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8" Height="paperHeight">Elo To</MudPaper>
+    </MudItem>
+
+    <MudItem xs="6">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8" Height="paperHeight">Name</MudPaper>
+    </MudItem>
+
+    <MudItem xs="3">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8" Height="paperHeight">Creator</MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int paperHeight = 120;
+
+    List<Listing> listings { get; set; } = new List<Listing>() {
+        new Listing()
+            {
+                EloFrom = 250,
+                EloTo = 1250,
+                Name = "Belekai geras game'as"
+            } };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var newListing = new Listing()
+            {
+                EloFrom = 125,
+                EloTo = 800,
+                Name = "Belekai levas game'as"
+            };
+
+        listings.Add(newListing);
+        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
+    }
+}

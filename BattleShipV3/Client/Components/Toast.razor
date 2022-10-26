@@ -1,0 +1,60 @@
+﻿@using MudBlazor
+@using static BattleShipV3.Data.Enums
+
+@inject ToastService toastService
+
+@if(isShowingToast == true)
+{
+    <div class="modal" tabindex="-1" style="display:block">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>@ToastLevel.ToString()</h2>
+            </div>
+            <div class="modal-body">
+                @_message
+            </div>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HideToast">Confirm</MudButton>
+            @*TODO CANCEL BUTTON/CONFIRMATION TOAST*@
+            @*<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser">Register</MudButton>*@
+        </div>
+    </div>
+</div>
+}
+
+@implements IDisposable
+
+@code {
+    private string _message { get; set; }
+
+    private ToastLevel ToastLevel { get; set; }
+
+    public bool? isShowingToast { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        toastService.OnShow += ShowToast;
+        toastService.OnHide += HideToast;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ShowToast(string message, ToastLevel level)
+    {
+        this._message = message;
+        this.ToastLevel = level;
+        isShowingToast = true;
+        StateHasChanged();
+    }
+
+    private void HideToast()
+    {
+        isShowingToast = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        toastService.OnShow -= ShowToast;
+    }
+}

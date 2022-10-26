@@ -1,13 +1,9 @@
-﻿@page "/"
+﻿@page "/test"
 @using Microsoft.AspNetCore.SignalR.Client
-@using BattleShipV3.Shared
-@using BattleShipV3.Data.Models
-
 @inject NavigationManager Navigation
-
 @implements IAsyncDisposable
 
-<PageTitle>Index</PageTitle>
+<PageTitle>testing</PageTitle>
 
 <div class="form-group">
     <label>
@@ -40,26 +36,28 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Global.CurrentUser = new Models.User()
-            {
-                Elo = 300,
-                Email = "laucek@ktu.edu",
-                Name = "Walas"
-            };
-
-        if(Global.CurrentUser is null)
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-        Navigation.NavigateTo("/listings");
-
-
-
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+            .WithUrl("https://localhost:7155/chathub")
             .WithAutomaticReconnect()
             .Build();
+
+        hubConnection.Reconnected += (sender) =>
+        {
+            var a = "Reconnected";
+            messages.Add(a);
+            InvokeAsync(StateHasChanged);
+            return Task.CompletedTask;
+        };
+
+        try
+        {
+            await hubConnection.StartAsync();
+            messages.Add("Connected");
+        }
+        catch (Exception ex)
+        {
+            messages.Add(ex.Message);
+        }
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
