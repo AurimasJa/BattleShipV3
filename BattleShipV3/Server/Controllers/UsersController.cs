@@ -8,7 +8,7 @@ using BattleShipV3.Shared.Data.Commands.User.Update;
 namespace BattleShipV3.Server.Controllers;
 
 [ApiController]
-[Route(("api/users"))]
+[Route("[controller]")]
 public class UsersController : ControllerBase
 {
     private readonly IUsersRepository _usersRepository;
