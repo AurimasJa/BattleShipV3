@@ -45,9 +45,8 @@
             Navigation.NavigateTo("/login");
             return;
         }
+
         Navigation.NavigateTo("/listings");
-
-
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/chathub"))

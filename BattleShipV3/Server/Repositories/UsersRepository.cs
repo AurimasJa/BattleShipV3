@@ -9,7 +9,7 @@ namespace BattleShipV3.Server.Repositories
         Task CreateUserAsync(User user);
         Task DeleteUserAsync(User user);
         Task<IReadOnlyList<User>> GetAllUsersAsync();
-        Task<User?> GetUserAsync(int? userId, string? email);
+        Task<User?> GetUserAsync(int? userId, string? email = null);
         Task UpdateUserAsync(User user);
     }
 
@@ -27,7 +27,7 @@ namespace BattleShipV3.Server.Repositories
             return await _battleshipDbContext.Users.ToListAsync();
         }
 
-        public async Task<User?> GetUserAsync(int? userId, string? email)
+        public async Task<User?> GetUserAsync(int? userId, string? email = null)
         {
             if(userId != null)
             {

@@ -1,4 +1,5 @@
-﻿using BattleShipV3.Shared.Data;
+﻿using BattleShipV3.Models;
+using BattleShipV3.Shared.Data;
 using BattleShipV3.Shared.Data.Commands.Listing.Create;
 using BattleShipV3.Shared.Data.Commands.Listing.Update;
 using BattleShipV3.Shared.Data.Helpers;
@@ -29,9 +30,10 @@ public class ListingService
     }
     //public async Task<List<>>
     //public async Task<List<>>
-    public async Task<HttpResponseMessage> InsertListingAsync(CreateListingCommand createListingCommand)
+    public async Task<Listing> InsertListingAsync(CreateListingCommand createListingCommand)
     {
-        return await _httpClient.PostAsync($"{baseUrl}/listings", RequestHelper.GetStringContentFromObject(createListingCommand));
+        var json = await _httpClient.PostAsync($"{baseUrl}/listings", RequestHelper.GetStringContentFromObject(createListingCommand));
+        return JsonConvert.DeserializeObject<Listing>(await json.Content.ReadAsStringAsync());
     }
     public async Task<HttpResponseMessage> UpdateListingAsync(UpdateListingCommand updateListingCommand)
     {

@@ -1,11 +1,13 @@
 ﻿
-using System.ComponentModel.DataAnnotations.Schema;
 using BattleShipV3.Data.Models;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace BattleShipV3.Models
 {
     public class Listing
     {
+        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
         public double? EloFrom { get; set; }
