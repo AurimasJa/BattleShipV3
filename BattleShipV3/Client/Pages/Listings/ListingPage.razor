@@ -1,4 +1,4 @@
-﻿@page "/Listings/{ListingId}"
+﻿@page "/Listings/{ListingId:int}"
 
 @using BattleShipV3.Models
 @using BattleShipV3.Shared
@@ -45,7 +45,7 @@ else
 
 @code {
     private Listing Listing { get; set; }
-    public int ListingId { get; set; }
+    [Parameter] public int ListingId { get; set; }
     private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()

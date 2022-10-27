@@ -11,10 +11,15 @@
 
 @implements IAsyncDisposable
 
+@if(Global.CurrentUser != null)
+{
+    <MudText>You are logged in as @($"{Global.CurrentUser?.Name}")</MudText>
+}
+
 <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="ToggleLobbyCreate" Style="margin:5px">Create a Lobby</MudButton>
 
 <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="JoinLobby" Disabled="selectedListing == null
-                || selectedListing.PlayerOne == Global.CurrentUser || selectedListing.PlayerTwo == Global.CurrentUser" Style="margin:5px">Join a Lobby</MudButton>
+                || selectedListing.PlayerOne.Id == Global.CurrentUser.Id || selectedListing.PlayerTwo?.Id == Global.CurrentUser.Id" Style="margin:5px">Join a Lobby</MudButton>
 
 @if(isLobbyCreatePopUpOpen)
 {
@@ -82,6 +87,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (Global.CurrentUser == null)
+            Navigation.NavigateTo("/login");
+
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
             .WithAutomaticReconnect()
@@ -117,7 +125,7 @@
 
         await hubConnection.SendAsync("JoinedListing", selectedListing, Global.CurrentUser);
 
-        Navigation.NavigateTo($"/listings/{selectedListing}");
+        Navigation.NavigateTo($"/listings/{selectedListing.Id}");
     }
 
     private async Task CreateLobby()
@@ -136,6 +144,8 @@
             };
 
         await hubConnection.SendAsync("CreateListing", createdListing);
+
+        Navigation.NavigateTo($"/listings/{createdListing.Id}");
     }
 
     private int GetLobbySize(Listing arg)
