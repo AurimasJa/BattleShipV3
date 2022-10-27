@@ -35,6 +35,7 @@
     protected override async Task OnInitializedAsync()
     {
         toastService.OnShow += ShowToast;
+        toastService.OnShowAsync += ShowToastAsync;
         toastService.OnHide += HideToast;
         await InvokeAsync(StateHasChanged);
     }
@@ -46,7 +47,13 @@
         isShowingToast = true;
         StateHasChanged();
     }
-
+    private async Task ShowToastAsync(string message, ToastLevel level)
+    {
+        this._message = message;
+        this.ToastLevel = level;
+        isShowingToast = true;
+        await InvokeAsync(StateHasChanged);
+    }
     private void HideToast()
     {
         isShowingToast = false;

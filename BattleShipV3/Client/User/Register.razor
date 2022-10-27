@@ -1,10 +1,15 @@
 ﻿@page "/register"
 
+@using BattleShipV3.Shared.Data.Commands.User.Create
 @using MudBlazor;
-
-@*@using BattleShipV3.Server*@
+@using Radzen.Blazor
+@using Models
 
 @inject ToastService toastService
+@*@using BattleShipV3.Server*@
+
+@inject UserService userService
+
 
 <h3>Register</h3>
 
@@ -21,8 +26,7 @@
 <MudText>Password</MudText>
 <MudInputString InputType="InputType.Password" @bind-Value="_passwordConfirmation"></MudInputString>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser">Register</MudButton>
-
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await RegisterUser())">Register</MudButton>
 @code {
     string _userName { get; set; }
     string _email { get; set; }
@@ -34,13 +38,20 @@
         Console.WriteLine("A");
     }
 
-    protected void RegisterUser()
+    protected async Task RegisterUser()
     {
-        if (UserIsValid()){
-            toastService.ShowToast("Toast", Data.Enums.ToastLevel.Info);
-
+        if (UserIsValid())
+        {                //TOAST NEVEIKIA
+            await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
+            await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
+            CreateUserCommand user = new CreateUserCommand(_userName, _email, _password);
+            await userService.InsertUserAsync(user);
         }
-        Console.WriteLine("A");
+        else
+        {                //TOAST NEVEIKIA
+            await Task.Run(() => toastService.ShowToast("Info", Data.Enums.ToastLevel.Error));
+            await toastService.ShowToastAsync("Info", Data.Enums.ToastLevel.Error);
+        }
     }
 
     protected bool UserIsValid(){
@@ -52,7 +63,7 @@
         {
             return false;
         }
-        else if(!_password.Equals(_passwordConfirmation))
+        else if(!_password.Equals(_passwordConfirmation) || _passwordConfirmation is null)
         {
             return false;
         }

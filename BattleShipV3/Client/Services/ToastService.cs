@@ -5,6 +5,7 @@ using Timer = System.Timers.Timer;
 public class ToastService : IDisposable
 {
     public event Action<string, ToastLevel> OnShow;
+    public event Func<string, ToastLevel, Task> OnShowAsync;
     public event Action OnHide;
     private Timer Countdown;
 
@@ -13,7 +14,11 @@ public class ToastService : IDisposable
         OnShow?.Invoke(message, level);
         StartCountdown();
     }
-
+    public async Task ShowToastAsync(string message, ToastLevel level)
+    {
+        OnShowAsync?.Invoke(message, level);
+        StartCountdown();
+    }
     private void StartCountdown()
     {
         SetCountdown();
