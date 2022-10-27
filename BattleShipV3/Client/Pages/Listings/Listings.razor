@@ -1,0 +1,172 @@
+﻿@page "/listings"
+
+@using BattleShipV3.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+@using MudBlazor
+@using Models
+@using MudBlazor.ThemeManager
+
+@inject ToastService toastService
+@inject NavigationManager Navigation
+
+@implements IAsyncDisposable
+
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="ToggleLobbyCreate" Style="margin:5px">Create a Lobby</MudButton>
+
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="JoinLobby" Disabled="selectedListing == null
+                || selectedListing.PlayerOne == Global.CurrentUser || selectedListing.PlayerTwo == Global.CurrentUser" Style="margin:5px">Join a Lobby</MudButton>
+
+@if(isLobbyCreatePopUpOpen)
+{
+     <MudPopover Open="@isLobbyCreatePopUpOpen" Fixed="true" Class="px-4 pt-4">
+        <div class="d-flex flex-column">
+            <MudText>Create a Lobby</MudText>
+            <MudText>Lobby Name:</MudText>
+            <MudInputString @bind-Value="lobbyName"></MudInputString>
+            <MudText>Minimum elo</MudText>
+            <MudNumericField @bind-Value="eloFrom"></MudNumericField>
+            <MudText>Maximum elo</MudText>
+            <MudNumericField @bind-Value="eloTo"></MudNumericField>
+            <MudButton OnClick="@CreateLobby" Class="ml-auto mr-n3 mb-1" Disabled="@(lobbyName == null || lobbyName.Length < 3)" Color="Color.Success">Create</MudButton>
+            <MudButton OnClick="@ToggleLobbyCreate" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
+        </div>
+</MudPopover>
+}
+
+
+<MudTable Items="@listings" Hover="true" Striped="true" Filter="new Func<Listing,bool>(FilterFunc1)" @bind-SelectedItem="selectedListing">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Match Listings</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Players</MudTh>
+        <MudTh>@(">=")</MudTh>
+        <MudTh>@("<")</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Creator</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Players">@($"{GetLobbySize(context)}/2")</MudTd>
+        <MudTd DataLabel=">=">@context.EloFrom</MudTd>
+        <MudTd DataLabel="<">@context.EloTo</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Creator">@context.PlayerOne.Name</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+
+</MudTable>
+
+
+<div class="d-flex flex-wrap mt-4">
+    <div style="min-width:200px;">
+        <MudText Inline="true" Class="align-self-center">Selected: @selectedListing?.Name</MudText>
+    </div>
+</div>
+
+@code {
+    private HubConnection? hubConnection;
+    private string searchString = "";
+    private Listing selectedListing;
+
+    List<Listing> listings { get; set; } = new List<Listing>();
+
+    private bool isLobbyCreatePopUpOpen = false;
+
+    //Lobby creation
+    int? eloFrom, eloTo;
+    string lobbyName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<Listing>("CreateListing", (lobby) =>
+        {
+            listings.Add(lobby);
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<Listing, User>("JoinedListing", (lobby, user) =>
+        {
+            lobby.PlayerTwo = user;
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
+        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
+    }
+
+    private void ToggleLobbyCreate()
+    {
+        isLobbyCreatePopUpOpen = isLobbyCreatePopUpOpen ? false : true;
+    }
+
+    private async Task JoinLobby()
+    {
+        if (hubConnection is null)
+            return;
+
+        await hubConnection.SendAsync("JoinedListing", selectedListing, Global.CurrentUser);
+
+        Navigation.NavigateTo($"/listings/{selectedListing}");
+    }
+
+    private async Task CreateLobby()
+    {
+        if (hubConnection is null)
+            return;
+
+        ToggleLobbyCreate();
+
+        var createdListing = new Models.Listing()
+            {
+                EloFrom = eloFrom,
+                EloTo = eloTo,
+                Name = lobbyName,
+                PlayerOne = Global.CurrentUser
+            };
+
+        await hubConnection.SendAsync("CreateListing", createdListing);
+    }
+
+    private int GetLobbySize(Listing arg)
+    {
+        int ret = 0;
+        if (arg.PlayerOne != null)
+            ret++;
+        if (arg.PlayerTwo != null)
+            ret++;
+
+        return ret;
+    }
+
+    private bool FilterFunc1(Listing element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(Listing element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.PlayerOne.Name}".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

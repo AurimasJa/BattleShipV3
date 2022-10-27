@@ -1,0 +1,136 @@
+﻿@page "/Listings/{ListingId}"
+
+@using BattleShipV3.Models
+@using BattleShipV3.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+
+<h3>@Listing.Name</h3>
+
+@inject NavigationManager Navigation
+
+<Row>
+    <MudTd DataLabel="Players">@($"{GetLobbySize(Listing)}/2")</MudTd>
+    <MudTd DataLabel=">=">@Listing.EloFrom</MudTd>
+    <MudTd DataLabel="<">@Listing.EloTo</MudTd>
+    <MudTd DataLabel="Name">@Listing.Name</MudTd>
+    <MudTd DataLabel="Creator">@Listing.PlayerOne.Name</MudTd>
+</Row>
+
+<MudText>
+    You are a @(HostOrGuestString())
+</MudText>
+
+@if(GetOpponent() is null)
+{
+    <MudText>
+        You don't have an opponent
+    </MudText>
+}
+else
+{
+    <MudText>
+        Your Opponent: @(GetOpponent).Name
+    </MudText>
+}
+
+
+
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="LeaveLobby" Style="margin:5px">Leave</MudButton>
+
+@if(IsCreator())
+{
+    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="StartGame" Style="margin:5px">Start</MudButton>
+}
+
+
+@code {
+    private Listing Listing { get; set; }
+    public int ListingId { get; set; }
+    private HubConnection? hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        @if (Listing.PlayerOne != null && Listing.PlayerTwo != null)
+            return;
+
+        hubConnection = new HubConnectionBuilder()
+               .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
+               .WithAutomaticReconnect()
+               .Build();
+
+        hubConnection.On<Listing, User>("JoinedListing", (lobby, user) =>
+        {
+            if(lobby == Listing)
+            {
+                if (Listing.PlayerOne is null)
+                    Listing.PlayerOne = user;
+                else
+                    Listing.PlayerTwo = user;
+
+                InvokeAsync(StateHasChanged);
+            }
+        });
+
+        hubConnection.On<Listing, User>("LeftListing", (lobby, user) =>
+        {
+            if(lobby == Listing)
+            {
+                if (Listing.PlayerOne == user)
+                    Listing.PlayerOne = Listing.PlayerTwo;
+                Listing.PlayerTwo = null;
+
+                InvokeAsync(StateHasChanged);
+            }
+        });
+    }
+
+    private async Task Load()
+    {
+        
+    }
+
+    private User GetOpponent()
+    {
+        return Global.CurrentUser == Listing.PlayerOne ? Listing.PlayerTwo : Listing.PlayerOne;
+    }
+
+    private string HostOrGuestString()
+    {
+        return IsCreator() ? "Host" : "Guest";
+    }
+
+    private bool IsCreator()
+    {
+        return Listing.PlayerOne == Global.CurrentUser;
+    }
+
+    private bool CanStartGame()
+    {
+        return Listing.PlayerOne != null && Listing.PlayerTwo != null;
+    }
+
+    private int GetLobbySize(Listing arg)
+    {
+        int ret = 0;
+        if (arg.PlayerOne != null)
+            ret++;
+        if (arg.PlayerTwo != null)
+            ret++;
+
+        return ret;
+    }
+
+    private async Task LeaveLobby()
+    {
+        if (hubConnection is null)
+            return;
+
+        await hubConnection.SendAsync("LeftListing", Listing, Global.CurrentUser);
+    }
+
+    private void StartGame()
+    {
+        //TODO
+    }
+
+}
