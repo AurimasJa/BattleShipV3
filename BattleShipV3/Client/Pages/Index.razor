@@ -40,13 +40,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Global.CurrentUser = new Models.User()
-            {
-                Elo = 300,
-                Email = "laucek@ktu.edu",
-                Name = "Walas"
-            };
-
         if(Global.CurrentUser is null)
         {
             Navigation.NavigateTo("/login");
