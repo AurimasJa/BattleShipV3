@@ -10,6 +10,5 @@ namespace BattleShipV3.Shared
     public static class Global
     {
         public static User CurrentUser { get; set; }
-        public static Listing CurrentListing { get; set; }
     }
 }

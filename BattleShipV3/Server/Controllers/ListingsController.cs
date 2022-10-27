@@ -13,11 +13,12 @@ namespace BattleShipV3.Server.Controllers;
 public class ListingsController : ControllerBase
 {
     private readonly IListingsRepository _listingsRepository;
-    //private readonly IUsersRepository _usersRepository;
+    private readonly IUsersRepository _usersRepository;
 
-    public ListingsController(IListingsRepository listingsRepository)
+    public ListingsController(IListingsRepository listingsRepository, IUsersRepository usersRepository)
     {
         _listingsRepository = listingsRepository;
+        _usersRepository = usersRepository;
     }
 
     [HttpGet("{id}")]
@@ -39,11 +40,6 @@ public class ListingsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<GetListingCommand>> CreateListingAsync(CreateListingCommand createListingCommand)
     {
-
-        if (Global.CurrentUser == null)
-        {
-            BadRequest("Current user not logged in.");    
-        }
         //var listings = await _usersRepository.get();
         if (createListingCommand == null)
         {
@@ -53,13 +49,15 @@ public class ListingsController : ControllerBase
         if (createListingCommand.Name == null)
             return BadRequest("Name can not be empty");
 
+        var user = await _usersRepository.GetUserAsync(createListingCommand.User.Id);
+
         var listing = new Listing
         {
             Name = createListingCommand.Name,
             EloFrom = createListingCommand.EloFrom,
             EloTo = createListingCommand.EloTo,
             CreationDate = DateTime.UtcNow,
-            PlayerOne = Global.CurrentUser
+            PlayerOne = user
         };
 
         await _listingsRepository.CreateListingAsync(listing);

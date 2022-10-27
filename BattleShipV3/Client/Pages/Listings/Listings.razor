@@ -1,6 +1,7 @@
 ﻿@page "/listings"
 
 @using BattleShipV3.Shared
+@using BattleShipV3.Shared.Data.Commands.Listing.Create
 @using Microsoft.AspNetCore.SignalR.Client
 @using MudBlazor
 @using Models
@@ -8,6 +9,8 @@
 
 @inject ToastService toastService
 @inject NavigationManager Navigation
+@inject ListingService listingService
+
 
 @implements IAsyncDisposable
 
@@ -82,13 +85,15 @@
     private bool isLobbyCreatePopUpOpen = false;
 
     //Lobby creation
-    int? eloFrom, eloTo;
+    double eloFrom, eloTo;
     string lobbyName;
 
     protected override async Task OnInitializedAsync()
     {
         if (Global.CurrentUser == null)
             Navigation.NavigateTo("/login");
+
+
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
@@ -107,7 +112,10 @@
             InvokeAsync(StateHasChanged);
         });
 
+
         await hubConnection.StartAsync();
+
+        await Load();
 
         await InvokeAsync(StateHasChanged);
         StateHasChanged();
@@ -135,17 +143,13 @@
 
         ToggleLobbyCreate();
 
-        var createdListing = new Models.Listing()
-            {
-                EloFrom = eloFrom,
-                EloTo = eloTo,
-                Name = lobbyName,
-                PlayerOne = Global.CurrentUser
-            };
+        var createdListing = new CreateListingCommand(lobbyName, eloFrom, eloTo, Global.CurrentUser);
+
+        var response = await listingService.InsertListingAsync(createdListing);
 
         await hubConnection.SendAsync("CreateListing", createdListing);
 
-        Navigation.NavigateTo($"/listings/{createdListing.Id}");
+        Navigation.NavigateTo($"/listings/{response?.Id}");
     }
 
     private int GetLobbySize(Listing arg)
@@ -157,6 +161,11 @@
             ret++;
 
         return ret;
+    }
+
+    private async Task Load()
+    {
+        listings = await listingService.GetListingsAsync();
     }
 
     private bool FilterFunc1(Listing element) => FilterFunc(element, searchString);

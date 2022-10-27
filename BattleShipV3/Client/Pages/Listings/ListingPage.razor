@@ -4,59 +4,69 @@
 @using BattleShipV3.Shared
 @using Microsoft.AspNetCore.SignalR.Client
 
-<h3>@Listing.Name</h3>
+<h3>@Listing?.Name</h3>
 
 @inject NavigationManager Navigation
+@inject ListingService listingService
 
-<Row>
-    <MudTd DataLabel="Players">@($"{GetLobbySize(Listing)}/2")</MudTd>
-    <MudTd DataLabel=">=">@Listing.EloFrom</MudTd>
-    <MudTd DataLabel="<">@Listing.EloTo</MudTd>
-    <MudTd DataLabel="Name">@Listing.Name</MudTd>
-    <MudTd DataLabel="Creator">@Listing.PlayerOne.Name</MudTd>
-</Row>
-
-<MudText>
-    You are a @(HostOrGuestString())
-</MudText>
-
-@if(GetOpponent() is null)
+@if(Listing is not null)
 {
+    <Row>
+        <MudTd DataLabel="Players">@($"{GetLobbySize(Listing)}/2")</MudTd>
+        <MudTd DataLabel=">=">@Listing.EloFrom</MudTd>
+        <MudTd DataLabel="<">@Listing.EloTo</MudTd>
+        <MudTd DataLabel="Name">@Listing.Name</MudTd>
+        <MudTd DataLabel="Creator">@Listing.PlayerOne.Name</MudTd>
+    </Row>
+
     <MudText>
-        You don't have an opponent
+        You are a @(HostOrGuestString())
     </MudText>
+
+    @*TODO CHECK FOR LOBBY PLAYERS*@
+    @if(true)
+    {
+        <MudText>
+            You don't have an opponent
+        </MudText>
+    }
+    else
+    {
+        <MudText>
+            Your have an opponet
+        </MudText>
+    }
+
+
+
+    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="LeaveLobby" Style="margin:5px">Leave</MudButton>
+
+    @if(IsCreator())
+    {
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="StartGame" Style="margin:5px">Start</MudButton>
+    }
 }
-else
-{
-    <MudText>
-        Your Opponent: @(GetOpponent).Name
-    </MudText>
-}
 
 
-
-<MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="LeaveLobby" Style="margin:5px">Leave</MudButton>
-
-@if(IsCreator())
-{
-    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="StartGame" Style="margin:5px">Start</MudButton>
-}
 
 
 @code {
-    private Listing Listing { get; set; }
+    private Listing? Listing { get; set; }
     [Parameter] public int ListingId { get; set; }
     private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-        @if (Listing.PlayerOne != null && Listing.PlayerTwo != null)
+        await Load();
+
+        if (Listing.PlayerOne != null && Listing.PlayerTwo != null)
             return;
 
+
         hubConnection = new HubConnectionBuilder()
-               .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
-               .WithAutomaticReconnect()
-               .Build();
+                   .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
+                   .WithAutomaticReconnect()
+                   .Build();
 
         hubConnection.On<Listing, User>("JoinedListing", (lobby, user) =>
         {
@@ -86,12 +96,14 @@ else
 
     private async Task Load()
     {
-        
+        Listing = await listingService.GetListingAsync(ListingId);
     }
 
     private User GetOpponent()
     {
-        return Global.CurrentUser == Listing.PlayerOne ? Listing.PlayerTwo : Listing.PlayerOne;
+        //if (Listing is null || Listing.PlayerOne is null || Global.CurrentUser is null)
+        //    return null;
+        return Global.CurrentUser.Id == Listing.PlayerOne.Id ? Listing.PlayerTwo : Listing.PlayerOne;
     }
 
     private string HostOrGuestString()
