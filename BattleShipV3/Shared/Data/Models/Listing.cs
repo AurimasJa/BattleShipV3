@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations.Schema;
+using BattleShipV3.Data.Models;
 
 namespace BattleShipV3.Models
 {
