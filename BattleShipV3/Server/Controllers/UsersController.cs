@@ -8,7 +8,7 @@ using BattleShipV3.Shared.Data.Commands.User.Update;
 namespace BattleShipV3.Server.Controllers;
 
 [ApiController]
-[Route(("api/users"))]
+[Route("[controller]")]
 public class UsersController : ControllerBase
 {
     private readonly IUsersRepository _usersRepository;
@@ -19,20 +19,28 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetUserCommand>> GetUserAsync(int? id, string? email)
+    public async Task<ActionResult<GetUserCommand>> GetUserAsync(int? id)
     {
-        var user = await _usersRepository.GetUserAsync(id, email);
+        var user = await _usersRepository.GetUserAsync(id, null);
         if (user == null)
             return NotFound($"User does not exist");
 
-        return new GetUserCommand(user.Id, user.Name, user.Email, user.CreationDate, user.Elo, user.Points);
+        return new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points);
     }
+    [HttpGet("email")]
+    public async Task<ActionResult<GetUserCommand>> GetUserByEmailAsync(string? email)
+    {
+        var user = await _usersRepository.GetUserAsync(null, email);
+        if (user == null)
+            return NotFound($"User does not exist");
 
+        return new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points);
+    }
     [HttpGet]
     public async Task<IEnumerable<GetUserCommand>> GetUsersAsync()
     {
         var users = await _usersRepository.GetAllUsersAsync();
-        return users.Select(x => new GetUserCommand(x.Id, x.Name, x.Email, x.CreationDate, x.Elo, x.Points));
+        return users.Select(x => new GetUserCommand(x.Id, x.Name, x.Email, x.Password, x.CreationDate, x.Elo, x.Points));
     }
 
     [HttpPost]
@@ -63,7 +71,7 @@ public class UsersController : ControllerBase
         };
 
         await _usersRepository.CreateUserAsync(user);
-        return Created("", new GetUserCommand(user.Id, user.Name, user.Email, user.CreationDate, user.Elo, user.Points));
+        return Created("", new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points));
     }
 
     [HttpPut]
@@ -75,7 +83,7 @@ public class UsersController : ControllerBase
         // 404
         if (user == null)
             return NotFound($"No user with id of {userId}");
-        if (updateUserCommand.Email is not null && updateUserCommand.Email.Contains('@'))
+        if (updateUserCommand.Email is not null && !updateUserCommand.Email.Contains('@'))
         {
             return BadRequest("Email is not valid");
         }
@@ -91,7 +99,7 @@ public class UsersController : ControllerBase
 
             await _usersRepository.UpdateUserAsync(user);
 
-            return Ok(new GetUserCommand(user.Id, user.Name, user.Email, user.CreationDate, user.Elo, user.Points));
+            return Ok(new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points));
         }
     }
 

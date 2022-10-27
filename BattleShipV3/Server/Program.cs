@@ -17,6 +17,15 @@ builder.Services.AddResponseCompression(opts =>
         new[] { "application/octet-stream" });
 });
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:44342"); // add the allowed origins
+                      });
+});
 
 var app = builder.Build();
 app.UseResponseCompression();
@@ -33,6 +42,10 @@ else
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseCors(MyAllowSpecificOrigins);
+
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();

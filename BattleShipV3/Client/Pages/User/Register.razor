@@ -1,0 +1,87 @@
+﻿@page "/register"
+
+@using BattleShipV3.Shared
+@using BattleShipV3.Shared.Data.Commands.User.Create
+@using MudBlazor;
+@using Radzen.Blazor
+@using Models
+
+@inject ToastService toastService
+@inject NavigationManager Navigation
+@*@using BattleShipV3.Server*@
+
+@inject UserService userService
+
+
+<h3>Register</h3>
+
+
+<MudText>Email</MudText>
+<MudInputString InputType="InputType.Email" @bind-Value="_email"></MudInputString>
+
+<MudText>UserName</MudText>
+<MudInputString @bind-Value="_userName"></MudInputString>
+
+<MudText>Password</MudText>
+<MudInputString InputType="InputType.Password" @bind-Value="_password"></MudInputString>
+
+<MudText>Password</MudText>
+<MudInputString InputType="InputType.Password" @bind-Value="_passwordConfirmation"></MudInputString>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await RegisterUser())">Register</MudButton>
+
+<MudButton Variant="Variant.Text" OnClick="NavigateToLogin">Already have an account? Login here</MudButton>
+
+@code {
+    string _userName { get; set; }
+    string _email { get; set; }
+    string _password { get; set; }
+    string _passwordConfirmation { get; set; }
+
+    protected async Task OnInitializedAsync()
+    {
+        Console.WriteLine("A");
+    }
+
+    protected async Task RegisterUser()
+    {
+        if (UserIsValid())
+        {                //TOAST NEVEIKIA
+            await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
+            await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
+            CreateUserCommand user = new CreateUserCommand(_userName, _email, _password);
+            await userService.InsertUserAsync(user);
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {                //TOAST NEVEIKIA
+            await Task.Run(() => toastService.ShowToast("Info", Data.Enums.ToastLevel.Error));
+            await toastService.ShowToastAsync("Info", Data.Enums.ToastLevel.Error);
+        }
+    }
+
+    protected bool UserIsValid(){
+        if (!_email.Contains('@') || _email is null)
+        {
+            return false;
+        }
+        else if (_password.Length < 3 || _password is null)
+        {
+            return false;
+        }
+        else if(!_password.Equals(_passwordConfirmation) || _passwordConfirmation is null)
+        {
+            return false;
+        }
+        else if(_userName is null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

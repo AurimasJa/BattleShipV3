@@ -1,0 +1,78 @@
+﻿@page "/login"
+
+@using BattleShipV3.Shared.Data.Commands.User.Create
+@using MudBlazor;
+@using Radzen.Blazor
+@using Models
+@using BattleShipV3.Shared
+
+@inject ToastService toastService
+@inject NavigationManager navigation
+@*@using BattleShipV3.Server*@
+
+@inject UserService userService
+
+<h3>Login</h3>
+
+<MudText>Email</MudText>
+<MudInputString InputType="InputType.Email" @bind-Value="_email"></MudInputString>
+
+<MudText>Password</MudText>
+<MudInputString InputType="InputType.Password" @bind-Value="_password"></MudInputString>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await LoginUser())">Login</MudButton>
+
+<MudButton Variant="Variant.Text" OnClick="NavigateToRegister">Don't have an account? Register here</MudButton>
+
+@code {
+    string _email { get; set; }
+    string _password { get; set; }
+
+    protected async Task OnInitializedAsync()
+    {
+        
+    }
+
+    protected async Task LoginUser()
+    {
+        if (UserIsValid())
+        {
+            await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
+            await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
+            var user = await userService.GetUserAsync(_email);
+
+            if (user.Password != _password)
+                return;
+
+            BattleShipV3.Shared.Global.CurrentUser = user;
+            //TOAST NEVEIKIA
+            await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
+            await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
+            navigation.NavigateTo("/");
+
+        }
+        else
+        {
+            await Task.Run(() => toastService.ShowToast("Info", Data.Enums.ToastLevel.Error));
+            await toastService.ShowToastAsync("Info", Data.Enums.ToastLevel.Error);
+        }
+    }
+
+    private void NavigateToRegister()
+    {
+        navigation.NavigateTo("/register");
+    }
+
+    protected bool UserIsValid()
+    {
+        if (!_email.Contains('@') || _email is null)
+        {
+            return false;
+        }
+        else if (_password.Length < 3 || _password is null)
+        {
+            return false;
+        }
+        return true;
+    }
+}
