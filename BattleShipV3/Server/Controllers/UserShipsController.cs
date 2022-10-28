@@ -3,11 +3,12 @@ using BattleShipV3.Data.Models;
 using BattleShipV3.Shared.Data.Commands.UserShips.Get;
 using BattleShipV3.Shared.Data.Commands.UserShips.Create;
 using Microsoft.AspNetCore.Mvc;
+using BattleShipV3.Shared.Data.Commands.User.Get;
 
 namespace BattleShipV3.Server.Controllers
 {
     [ApiController]
-    [Route("/api/pointsshop")]
+    [Route("[controller]")]
     public class UserShipsController : ControllerBase
     {
         private readonly IUserShipsRepository _userShipsRepository;
@@ -15,6 +16,13 @@ namespace BattleShipV3.Server.Controllers
         public UserShipsController(IUserShipsRepository userShipsRepository)
         {
             _userShipsRepository = userShipsRepository;
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<GetUserShipsCommand>> GetUserShipsAsync()
+        {
+            var userShips = await _userShipsRepository.GetAllUserShipsAsync();
+            return userShips.Select(x => new GetUserShipsCommand(x.Id, x.User, x.Ship));
         }
 
         [HttpPost]

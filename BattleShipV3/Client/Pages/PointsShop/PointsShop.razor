@@ -1,9 +1,10 @@
-﻿@page "/pointsshop"
+﻿@page "/userships"
 
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
 @using MudBlazor
 @using Models
+@using Data
 
 @inject UserShipsService userShipsService
 
@@ -106,8 +107,32 @@
 
 
 @code {
-    protected async Task RegisterUser()
+    protected async Task CreateUserShips()
     {
-        CreateUserShipsCommand user = new CreateUserShipsCommand();
+        var newUser = new User()
+            {
+                Name = "Test",
+                Email = "test@test",
+                Password = "asd",
+                CreationDate = DateTime.UtcNow,
+                Elo = 0,
+                Points = 0
+            };
+
+        var newMissile = new Data.Models.Missile()
+            {
+                Name = "TestMissile",
+                Cooldown = 0,
+                MissileType = 0
+            };
+
+        var newShip = new Data.Models.Ship()
+            {
+                Name = "TestShip",
+                Length = 1,
+                Missile = newMissile
+            };
+
+        CreateUserShipsCommand user = new CreateUserShipsCommand(newUser, newShip);
     }
 }

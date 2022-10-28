@@ -7,6 +7,7 @@ namespace BattleShipV3.Server.Repositories
     public interface IUserShipsRepository
     {
         Task CreateUserShipsAsync(UserShip userShip);
+        Task<IReadOnlyList<UserShip>> GetAllUserShipsAsync();
     }
     public class UserShipsRepository : IUserShipsRepository
     {
@@ -17,10 +18,10 @@ namespace BattleShipV3.Server.Repositories
             _battleshipDbContext = battleshipDbContext;
         }
 
-        //public async Task<IReadOnlyList<UserShip>> GetAllUsersAsync()
-        //{
-        //    return await _battleshipDbContext.UserShips.ToListAsync();
-        //}
+        public async Task<IReadOnlyList<UserShip>> GetAllUserShipsAsync()
+        {
+            return await _battleshipDbContext.UserShips.ToListAsync();
+        }
 
         //public async Task<User?> GetUserAsync(int? userId, string? email)
         //{
