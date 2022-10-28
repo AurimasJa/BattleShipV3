@@ -74,9 +74,12 @@ public class ListingsController : ControllerBase
         if (listing == null)
             return NotFound($"No listing with id of {listingId}");
 
+        var user = await _usersRepository.GetUserAsync(updateListingCommand.playerTwo.Id);
+
         listing.Name = updateListingCommand.Name is null ? listing.Name : updateListingCommand.Name;
         listing.EloFrom = updateListingCommand.EloFrom is null ? listing.EloFrom : updateListingCommand.EloFrom;
         listing.EloTo = updateListingCommand.EloTo is null ? listing.EloTo : updateListingCommand.EloTo;
+        listing.PlayerTwo = updateListingCommand.playerTwo is null ? listing.PlayerTwo : user;
 
         await _listingsRepository.UpdateListingAsync(listing);
 

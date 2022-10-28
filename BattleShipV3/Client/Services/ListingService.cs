@@ -35,9 +35,9 @@ public class ListingService
         var json = await _httpClient.PostAsync($"{baseUrl}/listings", RequestHelper.GetStringContentFromObject(createListingCommand));
         return JsonConvert.DeserializeObject<Listing>(await json.Content.ReadAsStringAsync());
     }
-    public async Task<HttpResponseMessage> UpdateListingAsync(UpdateListingCommand updateListingCommand)
+    public async Task<HttpResponseMessage> UpdateListingAsync(int listingId, UpdateListingCommand updateListingCommand)
     {
-        return await _httpClient.PostAsync($"{baseUrl}/listings", RequestHelper.GetStringContentFromObject(updateListingCommand));
+        return await _httpClient.PutAsync($"{baseUrl}/listings/{listingId}", RequestHelper.GetStringContentFromObject(updateListingCommand));
     }
 }
 

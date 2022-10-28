@@ -6,9 +6,9 @@ namespace BattleShipV3.Server.Hubs
 
     public class LobbyHub : Hub
     {
-        public async Task CreateListing(Listing lobby)
+        public async Task CreateListing(Listing lobby, Models.User user)
         {
-            await Clients.All.SendAsync("CreateListing", lobby);
+            await Clients.All.SendAsync("CreateListing", lobby, user);
         }
 
         public async Task JoinedListing(Listing lobby, User user)

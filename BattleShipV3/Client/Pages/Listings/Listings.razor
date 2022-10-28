@@ -2,6 +2,7 @@
 
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.Listing.Create
+@using BattleShipV3.Shared.Data.Commands.Listing.Update
 @using Microsoft.AspNetCore.SignalR.Client
 @using MudBlazor
 @using Models
@@ -100,8 +101,9 @@
             .WithAutomaticReconnect()
             .Build();
 
-        hubConnection.On<Listing>("CreateListing", (lobby) =>
+        hubConnection.On<Listing, Models.User>("CreateListing", (lobby, user) =>
         {
+            lobby.PlayerOne = user;
             listings.Add(lobby);
             InvokeAsync(StateHasChanged);
         });
@@ -133,12 +135,16 @@
 
         await hubConnection.SendAsync("JoinedListing", selectedListing, Global.CurrentUser);
 
+        var cmd = new UpdateListingCommand(Global.CurrentUser);
+
+        await listingService.UpdateListingAsync(selectedListing.Id, cmd);
+
         Navigation.NavigateTo($"/listings/{selectedListing.Id}");
     }
 
     private async Task CreateLobby()
     {
-        if (hubConnection is null)
+        if (hubConnection is null || Global.CurrentUser is null)
             return;
 
         ToggleLobbyCreate();
@@ -147,7 +153,7 @@
 
         var response = await listingService.InsertListingAsync(createdListing);
 
-        await hubConnection.SendAsync("CreateListing", createdListing);
+        await hubConnection.SendAsync("CreateListing", createdListing, Global.CurrentUser);
 
         Navigation.NavigateTo($"/listings/{response?.Id}");
     }

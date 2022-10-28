@@ -96,7 +96,10 @@
 
     private async Task Load()
     {
-        Listing = await listingService.GetListingAsync(ListingId);
+        if (ListingId != 0)
+            Listing = await listingService.GetListingAsync(ListingId);
+        else
+            Navigation.NavigateTo("/");
     }
 
     private User GetOpponent()
