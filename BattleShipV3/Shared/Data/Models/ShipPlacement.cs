@@ -1,5 +1,6 @@
-﻿
-using BattleShipV3.Models;
+﻿using BattleShipV3.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using static BattleShipV3.Data.Enums;
 
 namespace BattleShipV3.Data.Models

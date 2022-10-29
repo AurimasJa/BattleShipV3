@@ -49,7 +49,7 @@
         {                //TOAST NEVEIKIA
             await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
-            CreateUserCommand user = new CreateUserCommand(_userName, _email, _password);
+            CreateMissileCommand user = new CreateMissileCommand(_userName, _email, _password);
             await userService.InsertUserAsync(user);
             Navigation.NavigateTo("/login");
         }

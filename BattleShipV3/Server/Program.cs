@@ -12,6 +12,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<IUsersRepository, UsersRepository>();
 builder.Services.AddTransient<IListingsRepository, ListingsRepository>();
+builder.Services.AddTransient<IMissilesRepository, MissilesRepository>();
+builder.Services.AddTransient<IShipsRepository, ShipsRepository>();
+//builder.Services.AddTransient<IShipPlacementsRepository, ShipPlacementsRepository>();
 builder.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
