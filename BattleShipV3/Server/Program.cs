@@ -11,6 +11,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<IUsersRepository, UsersRepository>();
+builder.Services.AddTransient<IListingsRepository, ListingsRepository>();
 builder.Services.AddTransient<IUserShipsRepository, UserShipsRepository>();
 builder.Services.AddResponseCompression(opts =>
 {
@@ -18,6 +19,15 @@ builder.Services.AddResponseCompression(opts =>
         new[] { "application/octet-stream" });
 });
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:44342"); // add the allowed origins
+                      });
+});
 
 var app = builder.Build();
 app.UseResponseCompression();
@@ -35,6 +45,10 @@ else
 
 app.UseHttpsRedirection();
 
+
+app.UseCors(MyAllowSpecificOrigins);
+
+
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
@@ -45,6 +59,7 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/chathub");
+app.MapHub<LobbyHub>("/lobbyhub");
 app.MapFallbackToFile("index.html");
 
 app.Run();

@@ -7,6 +7,7 @@
 @using BattleShipV3.Shared
 
 @inject ToastService toastService
+@inject NavigationManager navigation
 @*@using BattleShipV3.Server*@
 
 @inject UserService userService
@@ -19,42 +20,47 @@
 <MudText>Password</MudText>
 <MudInputString InputType="InputType.Password" @bind-Value="_password"></MudInputString>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await LoginUser())">Register</MudButton>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await LoginUser())">Login</MudButton>
+
+<MudButton Variant="Variant.Text" OnClick="NavigateToRegister">Don't have an account? Register here</MudButton>
+
 @code {
     string _email { get; set; }
     string _password { get; set; }
 
     protected async Task OnInitializedAsync()
     {
-        Console.WriteLine("A");
+        
     }
 
     protected async Task LoginUser()
     {
         if (UserIsValid())
         {
-            bool legitUser = false;
             await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
             var user = await userService.GetUserAsync(_email);
-            if (user.Password == _password)
-            {
-                BattleShipV3.Shared.Global.CurrentUser = user;
-                //TOAST NEVEIKIA
-                await Console.Out.WriteLineAsync("++++++");
-                await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
-                await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
-            }
-            if (legitUser){
-                //TOAST NEVEIKIA
-                await Console.Out.WriteLineAsync("--------");
-            }
+
+            if (user.Password != _password)
+                return;
+
+            BattleShipV3.Shared.Global.CurrentUser = user;
+            //TOAST NEVEIKIA
+            await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
+            await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
+            navigation.NavigateTo("/");
+
         }
         else
         {
             await Task.Run(() => toastService.ShowToast("Info", Data.Enums.ToastLevel.Error));
             await toastService.ShowToastAsync("Info", Data.Enums.ToastLevel.Error);
         }
+    }
+
+    private void NavigateToRegister()
+    {
+        navigation.NavigateTo("/register");
     }
 
     protected bool UserIsValid()

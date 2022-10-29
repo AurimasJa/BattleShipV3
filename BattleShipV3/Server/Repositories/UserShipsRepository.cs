@@ -7,8 +7,11 @@ namespace BattleShipV3.Server.Repositories
     public interface IUserShipsRepository
     {
         Task CreateUserShipsAsync(UserShip userShip);
+        //Task DeleteUserShipsAsync(UserShip userShip);
         Task<IReadOnlyList<UserShip>> GetAllUserShipsAsync();
+        //Task UpdateUserShipsAsync(UserShip userShip);
     }
+
     public class UserShipsRepository : IUserShipsRepository
     {
         private readonly BattleshipDbContext _battleshipDbContext;
@@ -23,33 +26,23 @@ namespace BattleShipV3.Server.Repositories
             return await _battleshipDbContext.UserShips.ToListAsync();
         }
 
-        //public async Task<User?> GetUserAsync(int? userId, string? email)
-        //{
-        //    if (userId != null)
-        //    {
-        //        return await _battleshipDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
-        //    }
-        //    else
-        //    {
-        //        return await _battleshipDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
-        //    }
-        //}
-
         public async Task CreateUserShipsAsync(UserShip userShip)
         {
             _battleshipDbContext.UserShips.Add(userShip);
             await _battleshipDbContext.SaveChangesAsync();
         }
 
-        //public async Task UpdateUserAsync(User user)
+        //Reikia?
+        //public async Task UpdateUserShipsAsync(UserShip userShip)
         //{
-        //    _battleshipDbContext.Users.Update(user);
+        //    _battleshipDbContext.UserShips.Update(userShip);
         //    await _battleshipDbContext.SaveChangesAsync();
         //}
 
-        //public async Task DeleteUserAsync(User user)
+        //Reikia?
+        //public async Task DeleteUserShipsAsync(UserShip userShip)
         //{
-        //    _battleshipDbContext.Users.Remove(user);
+        //    _battleshipDbContext.UserShips.Remove(userShip);
         //    await _battleshipDbContext.SaveChangesAsync();
         //}
     }

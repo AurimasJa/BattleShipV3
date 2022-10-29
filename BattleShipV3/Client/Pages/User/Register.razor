@@ -1,11 +1,13 @@
 ﻿@page "/register"
 
+@using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.User.Create
 @using MudBlazor;
 @using Radzen.Blazor
 @using Models
 
 @inject ToastService toastService
+@inject NavigationManager Navigation
 @*@using BattleShipV3.Server*@
 
 @inject UserService userService
@@ -27,6 +29,9 @@
 <MudInputString InputType="InputType.Password" @bind-Value="_passwordConfirmation"></MudInputString>
 
 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await RegisterUser())">Register</MudButton>
+
+<MudButton Variant="Variant.Text" OnClick="NavigateToLogin">Already have an account? Login here</MudButton>
+
 @code {
     string _userName { get; set; }
     string _email { get; set; }
@@ -46,6 +51,7 @@
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
             CreateUserCommand user = new CreateUserCommand(_userName, _email, _password);
             await userService.InsertUserAsync(user);
+            Navigation.NavigateTo("/login");
         }
         else
         {                //TOAST NEVEIKIA
@@ -72,5 +78,10 @@
             return false;
         }
         return true;
+    }
+
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
     }
 }

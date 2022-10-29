@@ -1,11 +1,13 @@
-﻿@page "/userships"
+﻿@page "/pointsshop"
 
+@using BattleShipV3.Shared
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
 @using MudBlazor
 @using Models
 @using Data
 
+@inject NavigationManager Navigation
 @inject UserShipsService userShipsService
 
 <PageTitle>Points shop</PageTitle>
@@ -109,30 +111,22 @@
 @code {
     protected async Task CreateUserShips()
     {
-        var newUser = new User()
-            {
-                Name = "Test",
-                Email = "test@test",
-                Password = "asd",
-                CreationDate = DateTime.UtcNow,
-                Elo = 0,
-                Points = 0
-            };
-
         var newMissile = new Data.Models.Missile()
             {
-                Name = "TestMissile",
+                Name = "TestMissileid3",
                 Cooldown = 0,
                 MissileType = 0
             };
 
         var newShip = new Data.Models.Ship()
             {
-                Name = "TestShip",
+                Name = "TestShipid3",
                 Length = 1,
                 Missile = newMissile
             };
 
-        CreateUserShipsCommand user = new CreateUserShipsCommand(newUser, newShip);
+        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, newShip);
+        await userShipsService.InsertUserShipsAsync(userShip);
+        Navigation.NavigateTo("/listings");
     }
 }

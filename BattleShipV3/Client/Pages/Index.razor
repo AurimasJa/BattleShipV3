@@ -40,22 +40,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Global.CurrentUser = new Models.User()
-            {
-                Elo = 300,
-                Email = "laucek@ktu.edu",
-                Name = "Walas"
-            };
-
         if(Global.CurrentUser is null)
         {
             Navigation.NavigateTo("/login");
             return;
         }
-        //Navigation.NavigateTo("/listings");
-        Navigation.NavigateTo("/userships");
 
-
+        Navigation.NavigateTo("/pointsshop");
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/chathub"))

@@ -1,4 +1,5 @@
 ﻿using BattleShipV3.Data.Models;
+using BattleShipV3.Models;
 using BattleShipV3.Shared.Data.Commands.User.Create;
 using BattleShipV3.Shared.Data.Commands.UserShips.Create;
 using BattleShipV3.Shared.Data.Helpers;
@@ -20,13 +21,14 @@ namespace BattleShipV3.Client.Services
 
         public async Task<List<UserShip>> GetUserShipsAsync()
         {
-            var userShip = await _httpClient.GetStringAsync($"{baseUrl}/userships");
+            var userShip = await _httpClient.GetStringAsync($"{baseUrl}/pointsshop");
             return JsonConvert.DeserializeObject<List<UserShip>>(userShip);
         }
 
-        public async Task<HttpResponseMessage> InsertUserShipsAsync(CreateUserShipsCommand createUserShipsCommand)
+        public async Task<UserShip> InsertUserShipsAsync(CreateUserShipsCommand createUserShipsCommand)
         {
-            return await _httpClient.PostAsync($"{baseUrl}/userships", RequestHelper.GetStringContentFromObject(createUserShipsCommand));
+            var json = await _httpClient.PostAsync($"{baseUrl}/pointsshop", RequestHelper.GetStringContentFromObject(createUserShipsCommand));
+            return JsonConvert.DeserializeObject<UserShip>(await json.Content.ReadAsStringAsync());
         }
     }
 }
