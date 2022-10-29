@@ -34,9 +34,9 @@ public class GameMatchService
         var json = await _httpClient.PostAsync($"{baseUrl}/gamematches", RequestHelper.GetStringContentFromObject(createGameMatchCommand));
         return JsonConvert.DeserializeObject<GameMatch>(await json.Content.ReadAsStringAsync());
     }
-    public async Task<HttpResponseMessage> UpdateGameMatchAsync(int listingId, UpdateGameMatchCommand updateGameMatchCommand)
+    public async Task<HttpResponseMessage> UpdateGameMatchAsync(int gameMatchesId, UpdateGameMatchCommand updateGameMatchCommand)
     {
-        return await _httpClient.PutAsync($"{baseUrl}/gamematches/{listingId}", RequestHelper.GetStringContentFromObject(updateGameMatchCommand));
+        return await _httpClient.PutAsync($"{baseUrl}/gamematches/{gameMatchesId}", RequestHelper.GetStringContentFromObject(updateGameMatchCommand));
     }
 }
 
