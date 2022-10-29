@@ -1,103 +1,115 @@
-﻿//using BattleShipV3.Server.Repositories;
-//using BattleShipV3.Models;
-//using BattleShipV3.Data.Models;
-//using BattleShipV3.Shared;
-//using BattleShipV3.Shared.Data.Commands.ShipPlacement.Get;
-//using BattleShipV3.Shared.Data.Commands.ShipPlacement.Create;
-//using Microsoft.AspNetCore.Mvc;
-//using BattleShipV3.Shared.Data.Commands.ShipPlacement.Update;
+﻿using BattleShipV3.Server.Repositories;
+using BattleShipV3.Models;
+using BattleShipV3.Data.Models;
+using BattleShipV3.Shared;
+using BattleShipV3.Shared.Data.Commands.ShipPlacement.Get;
+using BattleShipV3.Shared.Data.Commands.ShipPlacement.Create;
+using Microsoft.AspNetCore.Mvc;
+using BattleShipV3.Shared.Data.Commands.ShipPlacement.Update;
 
-//namespace BattleShipV3.Server.Controllers;
+namespace BattleShipV3.Server.Controllers;
 
-//[ApiController]
-//[Route("[controller]")]
-//public class ShipPlacementsController : ControllerBase
-//{
-//    private readonly IShipPlacementsRepository _shipPlacementsRepository;
+// GALIMAI NEVEIKIA - NETIKRINTA
 
-//    public ShipPlacementsController(IShipPlacementsRepository shipPlacementsRepository)
-//    {
-//        _shipPlacementsRepository = shipPlacementsRepository;
-//    }
+[ApiController]
+[Route("[controller]")]
+public class ShipPlacementsController : ControllerBase
+{
+    private readonly IShipPlacementsRepository _shipPlacementsRepository;
+    private readonly IGameMatchesRepository _gameMatchesRepository;
+    private readonly IUsersRepository _usersRepository;
+    private readonly IShipsRepository _shipsRepository;
 
-//    [HttpGet("{id}")]
-//    public async Task<ActionResult<GetShipPlacementCommand>> GetListingAsync(int? id)
-//    {
-//        var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(id);
-//        if (shipPlacement == null)
-//            return NotFound($"Listing does not exist");
+    public ShipPlacementsController(IShipPlacementsRepository shipPlacementsRepository, IGameMatchesRepository gameMatchesRepository, IUsersRepository usersRepository, IShipsRepository shipsRepository)
+    {
+        _shipPlacementsRepository = shipPlacementsRepository;
+        _gameMatchesRepository = gameMatchesRepository;
+        _usersRepository = usersRepository;
+        _shipsRepository = shipsRepository;
+    }
 
-//        return new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.Name, shipPlacement.EloFrom, shipPlacement.EloTo, shipPlacement.CreationDate, shipPlacement.PlayerOne, shipPlacement.PlayerTwo); // truksta user user2
-//    }
-//    [HttpGet]
-//    public async Task<IEnumerable<GetShipPlacementCommand>> GetListingsAsync()
-//    {
-//        var listings = await _shipPlacementsRepository.GetAllShipPlacementsAsync();
-//        return listings.Select(x => new GetShipPlacementCommand(x.Id, x.Name, x.EloFrom, x.EloTo, x.CreationDate, x.PlayerOne, x.PlayerTwo));
-//    }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<GetShipPlacementCommand>> GetShipPlacementAsync(int? id)
+    {
+        var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(id);
+        if (shipPlacement == null)
+            return NotFound($"Ship placement does not exist");
 
-//    [HttpPost]
-//    public async Task<ActionResult<GetShipPlacementCommand>> CreateListingAsync(CreateShipPlacementCommand createShipPlacementCommand)
-//    {
-//        //var listings = await _usersRepository.get();
-//        if (createShipPlacementCommand == null)
-//        {
-//            return BadRequest("Error");
-//        }
-//        // CreateListingCommand(string Name, double EloFrom, double EloTo);
-//        if (createShipPlacementCommand.Name == null)
-//            return BadRequest("Name can not be empty");
+        return new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.XCoordinate, shipPlacement.YCoordinate, shipPlacement.IsVerticalRotation, shipPlacement.Ship, shipPlacement.User, shipPlacement.GameMatch); // truksta user user2
+    }
+    [HttpGet]
+    public async Task<IEnumerable<GetShipPlacementCommand>> GetShipPlacementsAsync()
+    {
+        var shipPlacement = await _shipPlacementsRepository.GetAllShipPlacementsAsync();
+        return shipPlacement.Select(x => new GetShipPlacementCommand(x.Id, x.XCoordinate, x.YCoordinate, x.IsVerticalRotation, x.Ship, x.User, x.GameMatch));
+    }
 
-//        //var user = await _usersRepository.GetUserAsync(createShipPlacementCommand.User.Id);
+    [HttpPost]
+    public async Task<ActionResult<GetShipPlacementCommand>> CreateShipPlacementAsync(CreateShipPlacementCommand createShipPlacementCommand)
+    {
+        if (createShipPlacementCommand == null)
+        {
+            return BadRequest("Error");
+        }
+        if (createShipPlacementCommand.XCoordinate == null || createShipPlacementCommand.YCoordinate == null)
+            return BadRequest("Coordinates can not be empty");
 
-//        var shipPlacement = new ShipPlacement
-//        {
-//            //Name = createListingCommand.Name,
-//            //EloFrom = createListingCommand.EloFrom,
-//            //EloTo = createListingCommand.EloTo,
-//            //CreationDate = DateTime.UtcNow,
-//            //PlayerOne = user
-//        };
+        var ship = await _shipsRepository.GetShipAsync(createShipPlacementCommand.Ship.Id);
+        var user = await _usersRepository.GetUserAsync(createShipPlacementCommand.User.Id);
+        var gameMatch = await _gameMatchesRepository.GetGameMatchAsync(createShipPlacementCommand.gameMatch.Id);
 
-//        await _shipPlacementsRepository.CreateShipPlacementAsync(shipPlacement);
-//        return Created("", new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.Name, shipPlacement.EloFrom, shipPlacement.EloTo, shipPlacement.CreationDate, shipPlacement.PlayerOne, shipPlacement.PlayerTwo));
-//    }
+        var shipPlacement = new ShipPlacement
+        {
+            XCoordinate = createShipPlacementCommand.XCoordinate,
+            YCoordinate = createShipPlacementCommand.YCoordinate,
+            IsVerticalRotation = createShipPlacementCommand.IsVerticalRotation,
+            Ship = ship,
+            User = user,
+            GameMatch = gameMatch
+        };
 
-//    [HttpPut]
-//    [Route("{shipPlacementId}")]
-//    public async Task<ActionResult<GetShipPlacementCommand>> UpdateListingAsync(int shipPlacementId, UpdateShipPlacementCommand updateShipPlacementCommand)
-//    {
-//        var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(shipPlacementId);
+        await _shipPlacementsRepository.CreateShipPlacementAsync(shipPlacement);
+        return Created("", new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.XCoordinate, shipPlacement.YCoordinate, shipPlacement.IsVerticalRotation, shipPlacement.Ship, shipPlacement.User, shipPlacement.GameMatch));
+    }
 
-//        // 404 UpdateListingCommand(string? Name, double? EloFrom, double? EloTo);
-//        if (shipPlacement == null)
-//            return NotFound($"No shipPlacement with id of {shipPlacementId}");
+    [HttpPut]
+    [Route("{shipPlacementId}")]
+    public async Task<ActionResult<GetShipPlacementCommand>> UpdateShipPlacementAsync(int shipPlacementId, UpdateShipPlacementCommand updateShipPlacementCommand)
+    {
+        var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(shipPlacementId);
 
-//        //var user = await _usersRepository.GetUserAsync(updateListingCommand.playerTwo.Id);
+        if (shipPlacement == null)
+            return NotFound($"No shipPlacement with id of {shipPlacementId}");
 
-//        //shipPlacement.Name = updateListingCommand.Name is null ? shipPlacement.Name : updateListingCommand.Name;
-//        //shipPlacement.EloFrom = updateListingCommand.EloFrom is null ? shipPlacement.EloFrom : updateListingCommand.EloFrom;
-//        //shipPlacement.EloTo = updateListingCommand.EloTo is null ? shipPlacement.EloTo : updateListingCommand.EloTo;
-//        //shipPlacement.PlayerTwo = updateListingCommand.playerTwo is null ? shipPlacement.PlayerTwo : user;
+        //var ship = await _shipsRepository.GetShipAsync(updateShipPlacementCommand.ship.Id);
+        //var user = await _usersRepository.GetUserAsync(updateShipPlacementCommand.playerTwo.Id);
+        //var gameMatch = await _gameMatchesRepository.GetGameMatchAsync(updateShipPlacementCommand.playerTwo.Id);
 
-//        await _shipPlacementsRepository.UpdateShipPlacementAsync(shipPlacement);
+        shipPlacement.XCoordinate = updateShipPlacementCommand.XCoordinate is 0 ? shipPlacement.XCoordinate : updateShipPlacementCommand.XCoordinate;
+        shipPlacement.YCoordinate = updateShipPlacementCommand.YCoordinate is 0 ? shipPlacement.YCoordinate : updateShipPlacementCommand.YCoordinate;
+        shipPlacement.IsVerticalRotation = updateShipPlacementCommand.IsVerticalRotation is false ? shipPlacement.IsVerticalRotation : updateShipPlacementCommand.IsVerticalRotation;
+        //shipPlacement.Ship = updateShipPlacementCommand.Ship is null ? shipPlacement.Ship : ship;
+        //shipPlacement.User = updateShipPlacementCommand.User is null ? shipPlacement.User : user;
+        //shipPlacement.GameMatch = updateShipPlacementCommand.GameMatch is null ? shipPlacement.GameMatch : gameMatch;
 
-//        return Ok(new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.Name, shipPlacement.EloFrom, shipPlacement.EloTo, shipPlacement.CreationDate, shipPlacement.PlayerOne, shipPlacement.PlayerTwo));
-//    }
+        await _shipPlacementsRepository.UpdateShipPlacementAsync(shipPlacement);
 
-//    [HttpDelete("{shipPlacementId}")]
-//    public async Task<ActionResult> Remove(int shipPlacementId)
-//    {
-//        var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(shipPlacementId);
+        return Ok(new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.XCoordinate, shipPlacement.YCoordinate, shipPlacement.IsVerticalRotation, shipPlacement.Ship, shipPlacement.User, shipPlacement.GameMatch));
+    }
 
-//        // 404
-//        if (shipPlacement == null)
-//            return NotFound($"No shipPlacement with id of {shipPlacementId}"); ;
+    [HttpDelete("{shipPlacementId}")]
+    public async Task<ActionResult> Remove(int shipPlacementId)
+    {
+        var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(shipPlacementId);
 
-//        await _shipPlacementsRepository.DeleteShipPlacementAsync(shipPlacement);
+        // 404
+        if (shipPlacement == null)
+            return NotFound($"No shipPlacement with id of {shipPlacementId}"); ;
+
+        await _shipPlacementsRepository.DeleteShipPlacementAsync(shipPlacement);
 
 
-//        // 204
-//        return NoContent();
-//    }
-//}
+        // 204
+        return NoContent();
+    }
+}
