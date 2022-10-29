@@ -13,7 +13,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ListingService>();
 builder.Services.AddScoped<GameMatchService>();
 builder.Services.AddScoped<ShipService>();
-//builder.Services.AddScoped<ShipPlacementService>();
+builder.Services.AddScoped<ShipPlacementService>();
 builder.Services.AddScoped<MissileService>();
 builder.Services.AddMudServices();
 
