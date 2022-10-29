@@ -19,7 +19,7 @@ public class LeaderboardHistoryService
     public async Task<LeaderboardHistory> GetLeaderboardHistoryAsync(int leaderboradHistoryId)
     {
         var leaderboardHistory = await _httpClient.GetStringAsync($"{baseUrl}/leaderboardHistories/{leaderboradHistoryId}"); // ?? email?email={email}"
-        return JsonConvert.DeserializeObject<BattleShipV3.Models.LeaderboardHistory>(leaderboardHistory);
+        return JsonConvert.DeserializeObject<LeaderboardHistory>(leaderboardHistory);
     }
     public async Task<List<LeaderboardHistory>> GetLeaderboardHistoriesAsync()
     {
