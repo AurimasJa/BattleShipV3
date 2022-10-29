@@ -29,7 +29,7 @@ public class UserService
     }
     //public async Task<List<>>
     //public async Task<List<>>
-    public async Task<HttpResponseMessage> InsertUserAsync(CreateUserCommand createUserCommand)
+    public async Task<HttpResponseMessage> InsertUserAsync(CreateMissileCommand createUserCommand)
     {
         return await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(createUserCommand));
     }

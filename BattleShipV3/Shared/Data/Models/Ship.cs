@@ -1,4 +1,7 @@
-﻿namespace BattleShipV3.Data.Models
+﻿using BattleShipV3.Shared.Data;
+using BattleShipV3.Data.Models;
+
+namespace BattleShipV3.Data.Models
 {
     public class Ship
     {
