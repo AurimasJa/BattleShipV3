@@ -14,11 +14,13 @@ namespace BattleShipV3.Server.Controllers
     {
         private readonly IUserShipsRepository _userShipsRepository;
         private readonly IUsersRepository _usersRepository;
+        private readonly IShipsRepository _shipsRepository;
 
-        public UserShipsController(IUserShipsRepository userShipsRepository, IUsersRepository usersRepository)
+        public UserShipsController(IUserShipsRepository userShipsRepository, IUsersRepository usersRepository, IShipsRepository shipsRepository)
         {
             _userShipsRepository = userShipsRepository;
             _usersRepository = usersRepository;
+            _shipsRepository = shipsRepository;
         }
 
         [HttpGet]
@@ -37,11 +39,12 @@ namespace BattleShipV3.Server.Controllers
             }
 
             var user = await _usersRepository.GetUserAsync(createUserShipsCommand.User.Id);
+            var ship = await _shipsRepository.GetShipAsync(createUserShipsCommand.Ship.Id);
 
             var userShips = new UserShip
             {
                 User = user,
-                Ship = createUserShipsCommand.Ship
+                Ship = ship
             };
 
             await _userShipsRepository.CreateUserShipsAsync(userShips);

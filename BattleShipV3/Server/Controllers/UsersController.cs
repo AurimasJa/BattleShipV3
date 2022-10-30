@@ -19,32 +19,32 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetUserCommand>> GetUserAsync(int? id)
+    public async Task<ActionResult<GetMissileCommand>> GetUserAsync(int? id)
     {
         var user = await _usersRepository.GetUserAsync(id, null);
         if (user == null)
             return NotFound($"User does not exist");
 
-        return new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points);
+        return new GetMissileCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points);
     }
     [HttpGet("email")]
-    public async Task<ActionResult<GetUserCommand>> GetUserByEmailAsync(string? email)
+    public async Task<ActionResult<GetMissileCommand>> GetUserByEmailAsync(string? email)
     {
         var user = await _usersRepository.GetUserAsync(null, email);
         if (user == null)
             return NotFound($"User does not exist");
 
-        return new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points);
+        return new GetMissileCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points);
     }
     [HttpGet]
-    public async Task<IEnumerable<GetUserCommand>> GetUsersAsync()
+    public async Task<IEnumerable<GetMissileCommand>> GetUsersAsync()
     {
         var users = await _usersRepository.GetAllUsersAsync();
-        return users.Select(x => new GetUserCommand(x.Id, x.Name, x.Email, x.Password, x.CreationDate, x.Elo, x.Points));
+        return users.Select(x => new GetMissileCommand(x.Id, x.Name, x.Email, x.Password, x.CreationDate, x.Elo, x.Points));
     }
 
     [HttpPost]
-    public async Task<ActionResult<GetUserCommand>> CreateUserAsync(CreateUserCommand createUserCommand)
+    public async Task<ActionResult<GetMissileCommand>> CreateUserAsync(CreateMissileCommand createUserCommand)
     {
         if(createUserCommand == null)
         {
@@ -71,12 +71,12 @@ public class UsersController : ControllerBase
         };
 
         await _usersRepository.CreateUserAsync(user);
-        return Created("", new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points));
+        return Created("", new GetMissileCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points));
     }
 
     [HttpPut]
     [Route("{userId}")]
-    public async Task<ActionResult<GetUserCommand>> UpdateUserAsync(int userId, UpdateUserCommand updateUserCommand)
+    public async Task<ActionResult<GetMissileCommand>> UpdateUserAsync(int userId, UpdateUserCommand updateUserCommand)
     {
         var user = await _usersRepository.GetUserAsync(userId, null);
 
@@ -99,7 +99,7 @@ public class UsersController : ControllerBase
 
             await _usersRepository.UpdateUserAsync(user);
 
-            return Ok(new GetUserCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points));
+            return Ok(new GetMissileCommand(user.Id, user.Name, user.Email, user.Password, user.CreationDate, user.Elo, user.Points));
         }
     }
 

@@ -9,6 +9,7 @@
 
 @inject NavigationManager Navigation
 @inject UserShipsService userShipsService
+@inject ShipService shipService
 
 <PageTitle>Points shop</PageTitle>
 
@@ -109,23 +110,13 @@
 
 
 @code {
+    List<BattleShipV3.Data.Models.Ship> ships { get; set; } = new List<BattleShipV3.Data.Models.Ship>();
+
     protected async Task CreateUserShips()
     {
-        var newMissile = new Data.Models.Missile()
-            {
-                Name = "TestMissileid3",
-                Cooldown = 0,
-                MissileType = 0
-            };
+        ships = await shipService.GetShipsAsync();
 
-        var newShip = new Data.Models.Ship()
-            {
-                Name = "TestShipid3",
-                Length = 1,
-                Missile = newMissile
-            };
-
-        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, newShip);
+        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, ships[0]);
         await userShipsService.InsertUserShipsAsync(userShip);
         Navigation.NavigateTo("/listings");
     }
