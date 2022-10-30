@@ -1,4 +1,5 @@
 using BattleShipV3.Client;
+using BattleShipV3.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
@@ -15,6 +16,7 @@ builder.Services.AddScoped<GameMatchService>();
 builder.Services.AddScoped<ShipService>();
 builder.Services.AddScoped<ShipPlacementService>();
 builder.Services.AddScoped<MissileService>();
+builder.Services.AddScoped<UserShipsService>();
 builder.Services.AddMudServices();
 
 await builder.Build().RunAsync();

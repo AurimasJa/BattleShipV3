@@ -16,6 +16,7 @@ builder.Services.AddTransient<IMissilesRepository, MissilesRepository>();
 builder.Services.AddTransient<IShipsRepository, ShipsRepository>();
 builder.Services.AddTransient<IShipPlacementsRepository, ShipPlacementsRepository>();
 builder.Services.AddTransient<IGameMatchesRepository, GameMatchesRepository>();
+builder.Services.AddTransient<IUserShipsRepository, UserShipsRepository>();
 builder.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(

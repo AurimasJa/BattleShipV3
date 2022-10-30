@@ -25,7 +25,7 @@ public class ShipService
         var ship = await _httpClient.GetStringAsync($"{baseUrl}/ships/{shipId}"); // ?? email?email={email}"
         return JsonConvert.DeserializeObject<BattleShipV3.Data.Models.Ship>(ship);
     }
-    public async Task<List<BattleShipV3.Data.Models.Ship>> GetShipAsync()
+    public async Task<List<BattleShipV3.Data.Models.Ship>> GetShipsAsync()
     {
         var ship = await _httpClient.GetStringAsync($"{baseUrl}/ships"); // ??
         return JsonConvert.DeserializeObject<List<BattleShipV3.Data.Models.Ship>>(ship);
