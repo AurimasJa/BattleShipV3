@@ -1,4 +1,4 @@
-﻿@page "/listings"
+﻿@page "/listingslist"
 
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.Listing.Create
@@ -94,8 +94,6 @@
         if (Global.CurrentUser == null)
             Navigation.NavigateTo("/login");
 
-
-
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
             .WithAutomaticReconnect()
@@ -110,7 +108,17 @@
 
         hubConnection.On<Listing, User>("JoinedListing", (lobby, user) =>
         {
-            lobby.PlayerTwo = user;
+            listings[listings.FindIndex(e => e.Id == lobby.Id)].PlayerTwo = user;
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<Listing, User>("LeftListing", (lobby, user) =>
+        {
+            if (GetLobbySize(lobby) == 0)
+                listings.Remove(lobby);
+            else
+                listings[listings.FindIndex(e => e.Id == lobby.Id)].PlayerTwo = null;
+
             InvokeAsync(StateHasChanged);
         });
 
@@ -139,7 +147,7 @@
 
         await listingService.UpdateListingAsync(selectedListing.Id, cmd);
 
-        Navigation.NavigateTo($"/listings/{selectedListing.Id}");
+        Navigation.NavigateTo($"/listingslist/{selectedListing.Id}");
     }
 
     private async Task CreateLobby()
@@ -153,9 +161,9 @@
 
         var response = await listingService.InsertListingAsync(createdListing);
 
-        await hubConnection.SendAsync("CreateListing", createdListing, Global.CurrentUser);
+        await hubConnection.SendAsync("CreateListing", response, Global.CurrentUser);
 
-        Navigation.NavigateTo($"/listings/{response?.Id}");
+        Navigation.NavigateTo($"/listingslist/{response?.Id}");
     }
 
     private int GetLobbySize(Listing arg)

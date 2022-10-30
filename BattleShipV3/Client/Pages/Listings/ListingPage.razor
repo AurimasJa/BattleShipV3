@@ -1,7 +1,8 @@
-﻿@page "/Listings/{ListingId:int}"
+﻿@page "/Listingslist/{ListingId:int}"
 
 @using BattleShipV3.Models
 @using BattleShipV3.Shared
+@using BattleShipV3.Shared.Data.Commands.Listing.Update
 @using Microsoft.AspNetCore.SignalR.Client
 
 <h3>@Listing?.Name</h3>
@@ -24,7 +25,7 @@
     </MudText>
 
     @*TODO CHECK FOR LOBBY PLAYERS*@
-    @if(true)
+    @if(GetOpponent() is null)
     {
         <MudText>
             You don't have an opponent
@@ -33,13 +34,13 @@
     else
     {
         <MudText>
-            Your have an opponet
+            Your opponent is: @GetOpponent().Name
         </MudText>
     }
 
 
 
-    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="LeaveLobby" Style="margin:5px">Leave</MudButton>
+    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="@(async () => await LeaveLobby())" Style="margin:5px">Leave</MudButton>
 
     @if(IsCreator())
     {
@@ -59,10 +60,6 @@
     {
         await Load();
 
-        if (Listing.PlayerOne != null && Listing.PlayerTwo != null)
-            return;
-
-
         hubConnection = new HubConnectionBuilder()
                    .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
                    .WithAutomaticReconnect()
@@ -70,7 +67,7 @@
 
         hubConnection.On<Listing, User>("JoinedListing", (lobby, user) =>
         {
-            if(lobby == Listing)
+            if(lobby.Id == ListingId)
             {
                 if (Listing.PlayerOne is null)
                     Listing.PlayerOne = user;
@@ -83,16 +80,19 @@
 
         hubConnection.On<Listing, User>("LeftListing", (lobby, user) =>
         {
-            if(lobby == Listing)
+            if(lobby.Id == ListingId)
             {
-                if (Listing.PlayerOne == user)
+                if (Listing.PlayerOne.Id == user.Id)
                     Listing.PlayerOne = Listing.PlayerTwo;
                 Listing.PlayerTwo = null;
 
                 InvokeAsync(StateHasChanged);
             }
         });
+
+        await hubConnection.StartAsync();
     }
+
 
     private async Task Load()
     {
@@ -104,8 +104,8 @@
 
     private User GetOpponent()
     {
-        //if (Listing is null || Listing.PlayerOne is null || Global.CurrentUser is null)
-        //    return null;
+        if (Listing is null || Listing.PlayerOne is null || Global.CurrentUser is null)
+            return null;
         return Global.CurrentUser.Id == Listing.PlayerOne.Id ? Listing.PlayerTwo : Listing.PlayerOne;
     }
 
@@ -116,7 +116,7 @@
 
     private bool IsCreator()
     {
-        return Listing.PlayerOne == Global.CurrentUser;
+        return Listing.PlayerOne.Id == Global.CurrentUser.Id;
     }
 
     private bool CanStartGame()
@@ -140,7 +140,13 @@
         if (hubConnection is null)
             return;
 
+        UpdateListingCommand cmd = new UpdateListingCommand(removePlayerTwo: true);
+
+        await listingService.UpdateListingAsync(ListingId, cmd);
+
         await hubConnection.SendAsync("LeftListing", Listing, Global.CurrentUser);
+
+        Navigation.NavigateTo("/listingslist");
     }
 
     private void StartGame()
