@@ -1,10 +1,16 @@
 ﻿@page "/Repertoire"
+@using BattleShipV3.Client.Services
 @using BattleShipV3.Data.Models
+@using BattleShipV3.Shared
+@using BattleShipV3.Shared.Data.Commands.UserShips.Create
 @using MudBlazor
 @using MudBlazor.ThemeManager
 
 @inject ShipService shipService;
+@inject UserShipsService userShipService;
+@inject NavigationManager Navigation;
 
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="selectedSelectedShip == null" @onclick="RemoveShip" Style="margin:5px">Remove</MudButton>
 
 <MudTable Items="@selectedShips" Hover="true" Striped="true" Filter="new Func<Ship,bool>(FilterFunc1)" @bind-SelectedItem="selectedSelectedShip">
     <ToolBarContent>
@@ -17,7 +23,6 @@
         <MudTh>Ship Length</MudTh>
         <MudTh>Special</MudTh>
         <MudTh>Special Bonus</MudTh>
-        <MudTh>Ship Length</MudTh>
         <MudTh>Missile Name</MudTh>
         <MudTh>Missile Type</MudTh>
         <MudTh>Missile Cooldown</MudTh>
@@ -27,7 +32,6 @@
         <MudTh>@context.Length</MudTh>
         <MudTh>@context.GetSpecialtyName()</MudTh>
         <MudTh>@context.GetSpecialtyBonus()</MudTh>
-        <MudTh>@context.Length</MudTh>
         <MudTh>@context.Missile.Name</MudTh>
         <MudTh>@context.Missile.MissileType</MudTh>
         <MudTh>@context.Missile.Cooldown</MudTh>
@@ -40,6 +44,8 @@
 
 <hr />
 
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="selectedShips == null || selectedShips.Count >= 5 || selectedOwnedShip == null" @onclick="AddShip" Style="margin:5px">Select</MudButton>
+
 <MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Owned ship</MudText>
@@ -50,7 +56,6 @@
         <MudTh>Ship Length</MudTh>
         <MudTh>Special</MudTh>
         <MudTh>Special Bonus</MudTh>
-        <MudTh>Ship Length</MudTh>
         <MudTh>Missile Name</MudTh>
         <MudTh>Missile Type</MudTh>
         <MudTh>Missile Cooldown</MudTh>
@@ -60,7 +65,6 @@
         <MudTh>@context.Length</MudTh>
         <MudTh>@context.GetSpecialtyName()</MudTh>
         <MudTh>@context.GetSpecialtyBonus()</MudTh>
-        <MudTh>@context.Length</MudTh>
         <MudTh>@context.Missile.Name</MudTh>
         <MudTh>@context.Missile.MissileType</MudTh>
         <MudTh>@context.Missile.Cooldown</MudTh>
@@ -82,15 +86,36 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //ownedShips = shipService.
-        ownedShips = await shipService.GetShipsAsync();
+        if(Global.CurrentUser is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        ownedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id);
+        selectedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id, true);
         await InvokeAsync(StateHasChanged);
         StateHasChanged();
     }
 
-    protected void SelectShip()
+    protected async Task AddShip()
     {
-        
+        CreateUserSelectedShipCommand cmd = new CreateUserSelectedShipCommand(Global.CurrentUser.Id, selectedOwnedShip.Id);
+
+        await shipService.InsertUserSelectedShipAsync(cmd);
+
+        ownedShips.Remove(selectedOwnedShip);
+        selectedShips.Add(selectedOwnedShip);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task RemoveShip()
+    {
+        await userShipService.RemoveUserSelectedShip(Global.CurrentUser.Id, selectedSelectedShip.Id);
+
+        selectedShips.Remove(selectedSelectedShip);
+        ownedShips.Add(selectedSelectedShip);
+        await InvokeAsync(StateHasChanged);
     }
 
     private bool FilterFunc1(Ship element) => FilterFunc(element, searchString);
