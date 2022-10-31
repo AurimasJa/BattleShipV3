@@ -8,10 +8,21 @@ namespace BattleShipV3.Server.Repositories
     {
         Task CreateShipAsync(Ship ship);
         Task DeleteShipAsync(Ship ship);
+        Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId);
         Task<IReadOnlyList<Ship>> GetAllShipsAsync();
         Task<Ship?> GetShipAsync(int? shipId);
         Task UpdateShipAsync(Ship ship);
     }
+
+    // TURI BUTI SHIP->PAIMA VISUS SHIPS sutikrines su UserShips
+    //public interface IShipsRepository
+    //{
+    //    Task CreateShipAsync(Ship ship);
+    //    Task DeleteShipAsync(Ship ship);
+    //    Task<IReadOnlyList<Ship>> GetAllShipsAsync();
+    //    Task<Ship?> GetShipAsync(int? shipId);
+    //    Task UpdateShipAsync(Ship ship);
+    //}
 
     public class ShipsRepository : IShipsRepository
     {
@@ -30,6 +41,16 @@ namespace BattleShipV3.Server.Repositories
                 ToListAsync();
         }
 
+        public async Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId)
+        {
+            var local = await _battleshipDbContext.UserShips
+                .Where(o => o.User.Id == userId).ToListAsync();
+            var shipids = local.Select(o => o.Ship.Id).ToHashSet();
+
+
+
+            return await _battleshipDbContext.Ships.Where(o => shipids.Contains(o.Id)).ToListAsync();
+        }
         public async Task<Ship?> GetShipAsync(int? shipId)
         {
             return await _battleshipDbContext.Ships.

@@ -1,10 +1,12 @@
 ﻿using BattleShipV3.Server.Repositories;
 using BattleShipV3.Data.Models;
 using BattleShipV3.Shared;
+using BattleShipV3;
 using BattleShipV3.Shared.Data.Commands.Ship.Get;
 using BattleShipV3.Shared.Data.Commands.Ship.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.Ship.Update;
+using BattleShipV3.Models;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -14,6 +16,7 @@ public class ShipsController : ControllerBase
 {
     private readonly IShipsRepository _shipsRepository;
     private readonly IMissilesRepository _missilesRepository;
+    private readonly IUserShipsRepository _usersShipRepository;
 
 
     public ShipsController(IShipsRepository shipsRepository, IMissilesRepository missilesRepository)
@@ -38,7 +41,13 @@ public class ShipsController : ControllerBase
         var ships = await _shipsRepository.GetAllShipsAsync();
         return ships.Select(x => new GetShipCommand(x.Id, x.Name, x.Length, x.Missile));
     }
-
+    [HttpGet]
+    public async Task<IEnumerable<GetShipCommand>> GetAllUserShipsAsync(User user)
+    {
+        var userId = user.Id;
+        var ships = await _shipsRepository.GetAllOneUserShipsAsync(userId);
+        return ships.Select(x => new GetShipCommand(x.Id, x.Name, x.Length, x.Missile));
+    }
     [HttpPost]
     public async Task<ActionResult<GetShipCommand>> CreateShipAsync(CreateShipCommand createShipCommand)
     {
