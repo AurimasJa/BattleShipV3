@@ -20,12 +20,17 @@ public class ShipService
         this.baseUrl = "https://localhost:5001";
     }
 
-    public async Task<BattleShipV3.Data.Models.Ship> GetShipAsync(int shipId)
+    public async Task<Ship> GetShipAsync(int shipId)
     {
         var ship = await _httpClient.GetStringAsync($"{baseUrl}/ships/{shipId}"); // ?? email?email={email}"
         return JsonConvert.DeserializeObject<BattleShipV3.Data.Models.Ship>(ship);
     }
-    public async Task<List<BattleShipV3.Data.Models.Ship>> GetShipsAsync()
+    public async Task<List<Ship>> GetShipsAsync()
+    {
+        var ship = await _httpClient.GetStringAsync($"{baseUrl}/ships"); // ??
+        return JsonConvert.DeserializeObject<List<BattleShipV3.Data.Models.Ship>>(ship);
+    }
+    public async Task<List<Ship>> GetShipsByUserAsync(int userId)
     {
         var ship = await _httpClient.GetStringAsync($"{baseUrl}/ships"); // ??
         return JsonConvert.DeserializeObject<List<BattleShipV3.Data.Models.Ship>>(ship);

@@ -24,5 +24,12 @@ namespace BattleShipV3
             optionsBuilder.UseSqlServer("Server=tcp:battleshipserver.database.windows.net,1433;Initial Catalog=Battleship2;Persist Security Info=False;User ID=admin1;Password=Battleship1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            //modelBuilder.Entity<Ship>()
+            //    .HasDiscriminator<string>();
+        }
     }
 }

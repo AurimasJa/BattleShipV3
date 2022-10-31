@@ -1,0 +1,101 @@
+﻿@page "/Repertoire"
+@using BattleShipV3.Data.Models
+@using MudBlazor
+@using MudBlazor.ThemeManager
+
+@inject ShipService shipService;
+
+
+<MudTable Items="@selectedShips" Hover="true" Striped="true" Filter="new Func<Ship,bool>(FilterFunc1)" @bind-SelectedItem="selectedSelectedShip">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Selected Ships</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Ship Name</MudTh>
+        <MudTh>Ship Length</MudTh>
+        <MudTh>Special</MudTh>
+        <MudTh>Special Bonus</MudTh>
+        <MudTh>Ship Length</MudTh>
+        <MudTh>Missile Name</MudTh>
+        <MudTh>Missile Type</MudTh>
+        <MudTh>Missile Cooldown</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTh>@context.Name</MudTh>
+        <MudTh>@context.Length</MudTh>
+        <MudTh>@context.GetSpecialtyName()</MudTh>
+        <MudTh>@context.GetSpecialtyBonus()</MudTh>
+        <MudTh>@context.Length</MudTh>
+        <MudTh>@context.Missile.Name</MudTh>
+        <MudTh>@context.Missile.MissileType</MudTh>
+        <MudTh>@context.Missile.Cooldown</MudTh>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+
+</MudTable>
+
+<hr />
+
+<MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Owned ship</MudText>
+        <MudSpacer />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Ship Name</MudTh>
+        <MudTh>Ship Length</MudTh>
+        <MudTh>Special</MudTh>
+        <MudTh>Special Bonus</MudTh>
+        <MudTh>Ship Length</MudTh>
+        <MudTh>Missile Name</MudTh>
+        <MudTh>Missile Type</MudTh>
+        <MudTh>Missile Cooldown</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTh>@context.Name</MudTh>
+        <MudTh>@context.Length</MudTh>
+        <MudTh>@context.GetSpecialtyName()</MudTh>
+        <MudTh>@context.GetSpecialtyBonus()</MudTh>
+        <MudTh>@context.Length</MudTh>
+        <MudTh>@context.Missile.Name</MudTh>
+        <MudTh>@context.Missile.MissileType</MudTh>
+        <MudTh>@context.Missile.Cooldown</MudTh>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+
+</MudTable>
+
+@code {
+    List<Ship> selectedShips { get; set; }
+    IEnumerable<Ship> ownedShips { get; set; }
+
+    Ship selectedSelectedShip { get; set; }
+    Ship selectedOwnedShip { get; set; }
+
+    string searchString { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //ownedShips = shipService.
+        selectedShips = await shipService.GetShipsAsync();
+        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
+    }
+
+    private bool FilterFunc1(Ship element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(Ship element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+}
