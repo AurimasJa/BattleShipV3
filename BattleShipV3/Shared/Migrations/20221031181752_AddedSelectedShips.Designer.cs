@@ -4,6 +4,7 @@ using BattleShipV3;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BattleShipV3.Shared.Migrations
 {
     [DbContext(typeof(BattleshipDbContext))]
-    partial class BattleshipDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221031181752_AddedSelectedShips")]
+    partial class AddedSelectedShips
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,29 +194,6 @@ namespace BattleShipV3.Shared.Migrations
                     b.HasIndex("GameMatchId");
 
                     b.ToTable("Turns");
-                });
-
-            modelBuilder.Entity("BattleShipV3.Data.Models.UserSelectedShip", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ShipId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ShipId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserSelectedShips");
                 });
 
             modelBuilder.Entity("BattleShipV3.Data.Models.UserShip", b =>
@@ -436,25 +415,6 @@ namespace BattleShipV3.Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("GameMatch");
-                });
-
-            modelBuilder.Entity("BattleShipV3.Data.Models.UserSelectedShip", b =>
-                {
-                    b.HasOne("BattleShipV3.Data.Models.Ship", "Ship")
-                        .WithMany()
-                        .HasForeignKey("ShipId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BattleShipV3.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ship");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BattleShipV3.Data.Models.UserShip", b =>

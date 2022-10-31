@@ -39,11 +39,12 @@ public class ShipsController : ControllerBase
         return ships.Select(x => new GetShipCommand(x.Id, x.Name, x.Length, x.Missile));
     }
 
-    //[HttpGet("{userId}")]
-    //public async Task<IEnumerable<Ship>> GetShipsByUserAsync(int? userId)
-    //{
-
-    //}
+    [HttpGet("{userId}")]
+    public async Task<IEnumerable<GetShipCommand>> GetUserSelectedShipsAsync(int? userId)
+    {
+        var ships = await _shipsRepository.GetAllShipsAsync();
+        return ships.Select(x => new GetShipCommand(x.Id, x.Name, x.Length, x.Missile));
+    }
 
     [HttpPost]
     public async Task<ActionResult<GetShipCommand>> CreateShipAsync(CreateShipCommand createShipCommand)

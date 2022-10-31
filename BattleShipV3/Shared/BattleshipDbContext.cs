@@ -18,6 +18,7 @@ namespace BattleShipV3
         public DbSet<Submarine> Submarines { get; set; }
         public DbSet<Turn> Turns { get; set; }
         public DbSet<UserShip> UserShips { get; set; }
+        public DbSet<UserSelectedShip> UserSelectedShips { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

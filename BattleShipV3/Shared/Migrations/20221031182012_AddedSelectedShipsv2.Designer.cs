@@ -4,6 +4,7 @@ using BattleShipV3;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BattleShipV3.Shared.Migrations
 {
     [DbContext(typeof(BattleshipDbContext))]
-    partial class BattleshipDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221031182012_AddedSelectedShipsv2")]
+    partial class AddedSelectedShipsv2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
