@@ -22,7 +22,8 @@ public class UsersController : ControllerBase
     {
         var user = await _usersRepository.GetUserAsync(id, null);
         if (user == null)
-            return NotFound($"User does not exist");
+            //return NotFound($"User does not exist");
+            return null;
 
         return new User
         {
@@ -40,7 +41,8 @@ public class UsersController : ControllerBase
     {
         var user = await _usersRepository.GetUserAsync(null, email);
         if (user == null)
-            return NotFound($"User does not exist");
+            return null;
+        //return NotFound($"User does not exist");
 
         return new User
         {
