@@ -24,14 +24,19 @@ namespace BattleShipV3.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<GetUserShipsCommand>> GetUserShipsAsync()
+        public async Task<IEnumerable<UserShip>> GetUserShipsAsync()
         {
             var userShips = await _userShipsRepository.GetAllUserShipsAsync();
-            return userShips.Select(x => new GetUserShipsCommand(x.Id, x.User, x.Ship));
+            return userShips.Select(x => new UserShip
+            {
+                Id = x.Id,
+                Ship = x.Ship,
+                User = x.User
+            });
         }
 
         [HttpPost]
-        public async Task<ActionResult<GetUserShipsCommand>> CreateUserShipsAsync(CreateUserShipsCommand createUserShipsCommand)
+        public async Task<ActionResult<UserShip>> CreateUserShipsAsync(CreateUserShipsCommand createUserShipsCommand)
         {
             if (createUserShipsCommand == null)
             {
@@ -48,7 +53,12 @@ namespace BattleShipV3.Server.Controllers
             };
 
             await _userShipsRepository.CreateUserShipsAsync(userShips);
-            return Created("", new GetUserShipsCommand(userShips.Id, userShips.User, userShips.Ship));
+            return Created("", new UserShip
+            {
+                Id = userShips.Id,
+                Ship = userShips.Ship,
+                User = userShips.User
+            });
         }
     }
 }

@@ -6,6 +6,7 @@ using BattleShipV3.Shared.Data.Commands.ShipPlacement.Get;
 using BattleShipV3.Shared.Data.Commands.ShipPlacement.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.ShipPlacement.Update;
+using System.Linq;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -29,23 +30,41 @@ public class ShipPlacementsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetShipPlacementCommand>> GetShipPlacementAsync(int? id)
+    public async Task<ActionResult<ShipPlacement>> GetShipPlacementAsync(int? id)
     {
         var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(id);
         if (shipPlacement == null)
             return NotFound($"Ship placement does not exist");
 
-        return new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.XCoordinate, shipPlacement.YCoordinate, shipPlacement.IsVerticalRotation, shipPlacement.Ship, shipPlacement.User, shipPlacement.GameMatch); // truksta user user2
+        return new ShipPlacement
+        {
+            Id = shipPlacement.Id,
+            XCoordinate = shipPlacement.XCoordinate,
+            YCoordinate = shipPlacement.YCoordinate,
+            IsVerticalRotation = shipPlacement.IsVerticalRotation,
+            Ship = shipPlacement.Ship,
+            User = shipPlacement.User,
+            GameMatch = shipPlacement.GameMatch
+        }; // truksta user user2
     }
     [HttpGet]
-    public async Task<IEnumerable<GetShipPlacementCommand>> GetShipPlacementsAsync()
+    public async Task<IEnumerable<ShipPlacement>> GetShipPlacementsAsync()
     {
         var shipPlacement = await _shipPlacementsRepository.GetAllShipPlacementsAsync();
-        return shipPlacement.Select(x => new GetShipPlacementCommand(x.Id, x.XCoordinate, x.YCoordinate, x.IsVerticalRotation, x.Ship, x.User, x.GameMatch));
+        return shipPlacement.Select(x => new ShipPlacement
+        {
+            Id = x.Id,
+            XCoordinate = x.XCoordinate,
+            YCoordinate = x.YCoordinate,
+            IsVerticalRotation = x.IsVerticalRotation,
+            Ship = x.Ship,
+            User = x.User,
+            GameMatch = x.GameMatch
+        });
     }
 
     [HttpPost]
-    public async Task<ActionResult<GetShipPlacementCommand>> CreateShipPlacementAsync(CreateShipPlacementCommand createShipPlacementCommand)
+    public async Task<ActionResult<ShipPlacement>> CreateShipPlacementAsync(CreateShipPlacementCommand createShipPlacementCommand)
     {
         if (createShipPlacementCommand == null)
         {
@@ -69,12 +88,21 @@ public class ShipPlacementsController : ControllerBase
         };
 
         await _shipPlacementsRepository.CreateShipPlacementAsync(shipPlacement);
-        return Created("", new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.XCoordinate, shipPlacement.YCoordinate, shipPlacement.IsVerticalRotation, shipPlacement.Ship, shipPlacement.User, shipPlacement.GameMatch));
+        return Created("", new ShipPlacement
+        {
+            Id = shipPlacement.Id,
+            XCoordinate = shipPlacement.XCoordinate,
+            YCoordinate = shipPlacement.YCoordinate,
+            IsVerticalRotation = shipPlacement.IsVerticalRotation,
+            Ship = shipPlacement.Ship,
+            User = shipPlacement.User,
+            GameMatch = shipPlacement.GameMatch
+        });
     }
 
     [HttpPut]
     [Route("{shipPlacementId}")]
-    public async Task<ActionResult<GetShipPlacementCommand>> UpdateShipPlacementAsync(int shipPlacementId, UpdateShipPlacementCommand updateShipPlacementCommand)
+    public async Task<ActionResult<ShipPlacement>> UpdateShipPlacementAsync(int shipPlacementId, UpdateShipPlacementCommand updateShipPlacementCommand)
     {
         var shipPlacement = await _shipPlacementsRepository.GetShipPlacementsAsync(shipPlacementId);
 
@@ -94,7 +122,16 @@ public class ShipPlacementsController : ControllerBase
 
         await _shipPlacementsRepository.UpdateShipPlacementAsync(shipPlacement);
 
-        return Ok(new GetShipPlacementCommand(shipPlacement.Id, shipPlacement.XCoordinate, shipPlacement.YCoordinate, shipPlacement.IsVerticalRotation, shipPlacement.Ship, shipPlacement.User, shipPlacement.GameMatch));
+        return Ok(new ShipPlacement
+        {
+            Id = shipPlacement.Id,
+            XCoordinate = shipPlacement.XCoordinate,
+            YCoordinate = shipPlacement.YCoordinate,
+            IsVerticalRotation = shipPlacement.IsVerticalRotation,
+            Ship = shipPlacement.Ship,
+            User = shipPlacement.User,
+            GameMatch = shipPlacement.GameMatch
+        });
     }
 
     [HttpDelete("{shipPlacementId}")]
