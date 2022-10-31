@@ -44,7 +44,7 @@
 
     @if(IsCreator())
     {
-        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="StartGame" Style="margin:5px">Start</MudButton>
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="@(Listing.PlayerOne == null || Listing.PlayerTwo == null)" @onclick="StartGame" Style="margin:5px">Start</MudButton>
     }
 }
 
@@ -140,7 +140,15 @@
         if (hubConnection is null)
             return;
 
-        UpdateListingCommand cmd = new UpdateListingCommand(removePlayerTwo: true);
+        if (Listing.PlayerTwo is null)
+        {
+            await listingService.DeleteListingAsync(ListingId);
+            await hubConnection.SendAsync("DeleteListing", Listing, Global.CurrentUser);
+            Navigation.NavigateTo("/listingslist");
+            return;
+        }
+
+        UpdateListingCommand cmd = new UpdateListingCommand(Global.CurrentUser, removePlayerTwo: true);
 
         await listingService.UpdateListingAsync(ListingId, cmd);
 

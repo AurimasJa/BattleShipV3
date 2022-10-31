@@ -39,5 +39,10 @@ public class ListingService
     {
         return await _httpClient.PutAsync($"{baseUrl}/listings/{listingId}", RequestHelper.GetStringContentFromObject(updateListingCommand));
     }
+
+    public async Task<HttpResponseMessage> DeleteListingAsync(int listingId)
+    {
+        return await _httpClient.DeleteAsync($"{baseUrl}/listings/{listingId}");
+    }
 }
 

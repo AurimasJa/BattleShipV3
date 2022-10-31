@@ -122,6 +122,12 @@
             InvokeAsync(StateHasChanged);
         });
 
+        hubConnection.On<Listing, User>("DeleteListing", (lobby, user) =>
+        {
+            listings.RemoveAll(e => e.Id == lobby.Id);
+            InvokeAsync(StateHasChanged);
+        });
+
 
         await hubConnection.StartAsync();
 

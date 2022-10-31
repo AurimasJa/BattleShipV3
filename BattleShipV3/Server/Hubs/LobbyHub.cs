@@ -20,5 +20,10 @@ namespace BattleShipV3.Server.Hubs
         {
             await Clients.All.SendAsync("LeftListing", lobby, user);
         }
+
+        public async Task DeleteListing(Listing lobby, User user)
+        {
+            await Clients.All.SendAsync("DeleteListing", lobby, user);
+        }
     }
 }
