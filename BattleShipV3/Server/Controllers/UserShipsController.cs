@@ -1,9 +1,7 @@
 ﻿using BattleShipV3.Server.Repositories;
 using BattleShipV3.Data.Models;
-using BattleShipV3.Shared.Data.Commands.UserShips.Get;
 using BattleShipV3.Shared.Data.Commands.UserShips.Create;
 using Microsoft.AspNetCore.Mvc;
-using BattleShipV3.Shared.Data.Commands.User.Get;
 using BattleShipV3.Shared.Data.Commands.Listing.Create;
 
 namespace BattleShipV3.Server.Controllers
