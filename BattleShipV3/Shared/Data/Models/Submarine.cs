@@ -4,5 +4,14 @@
     {
         public int Id { get; set; }
         public int HiddenDuration { get; set; }
+
+        public override int GetSpecialtyBonus()
+        {
+            return HiddenDuration;
+        }
+        public override string GetSpecialtyName()
+        {
+            return "Submerge";
+        }
     }
 }

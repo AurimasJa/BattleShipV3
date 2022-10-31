@@ -7,3 +7,5 @@ using BattleShipV3.Models;
 namespace BattleShipV3.Shared.Data.Commands.UserShips.Create;
 
 public record CreateUserShipsCommand(Models.User User, BattleShipV3.Data.Models.Ship Ship);
+
+public record CreateUserSelectedShipCommand(int userId, int shipId);

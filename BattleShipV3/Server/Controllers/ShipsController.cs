@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.Ship.Update;
 using static MudBlazor.CategoryTypes;
 using BattleShipV3.Models;
+using BattleShipV3.Shared.Data.Commands.UserShips.Create;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -16,45 +17,39 @@ namespace BattleShipV3.Server.Controllers;
 public class ShipsController : ControllerBase
 {
     private readonly IShipsRepository _shipsRepository;
+    private readonly IUsersRepository _usersRepository;
     private readonly IMissilesRepository _missilesRepository;
     private readonly IUserShipsRepository _usersShipRepository;
 
 
-    public ShipsController(IShipsRepository shipsRepository, IMissilesRepository missilesRepository)
+    public ShipsController(IShipsRepository shipsRepository, IMissilesRepository missilesRepository, IUsersRepository userRepository)
     {
         _shipsRepository = shipsRepository;
         _missilesRepository = missilesRepository;
-
+        _usersRepository = userRepository;
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Ship>> GetShipAsync(int? id)
-    {
-        var ship = await _shipsRepository.GetShipAsync(id);
-        if (ship == null)
-            return NotFound($"Ship does not exist");
+    //[HttpGet("{id}")]
+    //public async Task<ActionResult<Ship>> GetShipAsync(int? id)
+    //{
+    //    var ship = await _shipsRepository.GetShipAsync(id);
+    //    if (ship == null)
+    //        return NotFound($"Ship does not exist");
 
-        return new Ship { Id = ship.Id,Name= ship.Name, Length=ship.Length, Missile = ship.Missile}; // truksta user user2
-    }
+    //    return new Ship { Id = ship.Id,Name= ship.Name, Length=ship.Length, Missile = ship.Missile}; // truksta user user2
+    //}
     [HttpGet]
     public async Task<IEnumerable<Ship>> GetShipsAsync()
     {
         var ships = await _shipsRepository.GetAllShipsAsync();
         return ships.Select(x => new Ship { Id = x.Id, Name = x.Name, Length = x.Length, Missile = x.Missile });
     }
-    [HttpGet]
-    public async Task<IEnumerable<Ship>> GetAllUserShipsAsync(User user)
+    [HttpGet("{userId}")]
+    public async Task<IReadOnlyList<Ship>> GetAllUserShipsAsync(int? userId, bool? selected)
     {
-        var userId = user.Id;
-        var ships = await _shipsRepository.GetAllOneUserShipsAsync(userId);
-        return ships.Select(x => new Ship
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Length = x.Length,
-            Missile = x.Missile
-        });
+        return await _shipsRepository.GetAllOneUserShipsAsync(userId.Value, selected);
     }
+
     [HttpPost]
     public async Task<ActionResult<Ship>> CreateShipAsync(CreateShipCommand createShipCommand)
     {
@@ -78,6 +73,33 @@ public class ShipsController : ControllerBase
         return Created("", new Ship { Id = ship.Id, Name = ship.Name, Length = ship.Length, Missile = ship.Missile });
     }
 
+    [HttpPost]
+    [Route("userselected")]
+    public async Task<ActionResult<UserSelectedShip>> CreateUserShipsAsync(CreateUserSelectedShipCommand createUserSelectedShipCommand)
+    {
+        if (createUserSelectedShipCommand == null)
+        {
+            return BadRequest("Error");
+        }
+
+        var user = await _usersRepository.GetUserAsync(createUserSelectedShipCommand.userId);
+        var ship = await _shipsRepository.GetShipAsync(createUserSelectedShipCommand.shipId);
+
+        var userShips = new UserSelectedShip
+        {
+            User = user,
+            Ship = ship
+        };
+
+        await _shipsRepository.CreateUserSelectedShipAsync(userShips);
+        return Created("", new UserSelectedShip
+        {
+            Id = userShips.Id,
+            Ship = userShips.Ship,
+            User = userShips.User
+        });
+    }
+
     [HttpPut]
     [Route("{shipId}")]
     public async Task<ActionResult<Ship>> UpdateShipAsync(int shipId, UpdateShipCommand updateShipCommand)
@@ -95,19 +117,10 @@ public class ShipsController : ControllerBase
         return Ok(new Ship { Id = ship.Id, Name = ship.Name, Length = ship.Length, Missile = ship.Missile });
     }
 
-    [HttpDelete("{shipId}")]
-    public async Task<ActionResult> Remove(int shipId)
+    [HttpDelete]
+    public async Task<ActionResult> RemoveUserSelectedShip(int userId, int shipId)
     {
-        var ship = await _shipsRepository.GetShipAsync(shipId);
-
-        // 404
-        if (ship == null)
-            return NotFound($"No ship with id of {shipId}"); ;
-
-        await _shipsRepository.DeleteShipAsync(ship);
-
-
-        // 204
-        return NoContent();
+        await _shipsRepository.RemoveUserSelectedShipAsync(userId, shipId);
+        return Ok();
     }
 }
