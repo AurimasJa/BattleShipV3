@@ -1,6 +1,7 @@
 ﻿using BattleShipV3.Shared.Data;
 using BattleShipV3.Shared.Data.Commands.User.Create;
 using BattleShipV3.Shared.Data.Commands.User.Update;
+using BattleShipV3.Shared.Data.Commands.UserShips.Create;
 using BattleShipV3.Shared.Data.Helpers;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
@@ -29,13 +30,17 @@ public class UserService
     }
     //public async Task<List<>>
     //public async Task<List<>>
-    public async Task<HttpResponseMessage> InsertUserAsync(CreateMissileCommand createUserCommand)
+    public async Task<HttpResponseMessage> InsertUserAsync(CreateUserCommand createUserCommand)
     {
         return await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(createUserCommand));
     }
     public async Task<HttpResponseMessage> UpdateUserAsync(UpdateUserCommand updateUserCommand)
     {
         return await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(updateUserCommand));
+    }
+    public async Task<HttpResponseMessage> DeleteUserAsync(int id)
+    {
+        return await _httpClient.DeleteAsync($"{baseUrl}/users/{id}");
     }
 }
 

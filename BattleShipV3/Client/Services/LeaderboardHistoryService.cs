@@ -37,5 +37,9 @@ public class LeaderboardHistoryService
     {
         return await _httpClient.PutAsync($"{baseUrl}/leaderboardHistories/{leaderboradHistoryId}", RequestHelper.GetStringContentFromObject(updateLeaderboardHistoryCommand));
     }
+    public async Task<HttpResponseMessage> DeleteLeaderboardHistoryAsync(int id)
+    {
+        return await _httpClient.DeleteAsync($"{baseUrl}/leaderboardHistories/{id}");
+    }
 }
 

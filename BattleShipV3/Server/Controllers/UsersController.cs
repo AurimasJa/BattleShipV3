@@ -1,6 +1,5 @@
 ﻿using BattleShipV3.Server.Repositories;
 using BattleShipV3.Models;
-using BattleShipV3.Shared.Data.Commands.User.Get;
 using BattleShipV3.Shared.Data.Commands.User.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.User.Update;
@@ -71,7 +70,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<User>> CreateUserAsync(CreateMissileCommand createUserCommand)
+    public async Task<ActionResult<User>> CreateUserAsync(CreateUserCommand createUserCommand)
     {
         if(createUserCommand == null)
         {

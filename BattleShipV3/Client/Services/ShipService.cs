@@ -2,7 +2,6 @@
 using BattleShipV3.Data.Models;
 using BattleShipV3.Shared.Data;
 using BattleShipV3.Shared.Data.Commands.Ship.Create;
-using BattleShipV3.Shared.Data.Commands.Ship.Get;
 using BattleShipV3.Shared.Data.Commands.Ship.Update;
 using BattleShipV3.Shared.Data.Helpers;
 using Newtonsoft.Json;
@@ -40,6 +39,10 @@ public class ShipService
     public async Task<HttpResponseMessage> UpdateShipAsync(int shipId, UpdateShipCommand updateShipCommand)
     {
         return await _httpClient.PutAsync($"{baseUrl}/ships/{shipId}", RequestHelper.GetStringContentFromObject(updateShipCommand));
+    }
+    public async Task<HttpResponseMessage> DeleteShipAsync(int id)
+    {
+        return await _httpClient.DeleteAsync($"{baseUrl}/ships/{id}");
     }
 }
 
