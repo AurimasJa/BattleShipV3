@@ -2,7 +2,6 @@
 using BattleShipV3.Models;
 using BattleShipV3.Data.Models;
 using BattleShipV3.Shared;
-using BattleShipV3.Shared.Data.Commands.ShipPlacement.Get;
 using BattleShipV3.Shared.Data.Commands.ShipPlacement.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.ShipPlacement.Update;

@@ -38,5 +38,9 @@ public class GameMatchService
     {
         return await _httpClient.PutAsync($"{baseUrl}/gamematches/{gameMatchesId}", RequestHelper.GetStringContentFromObject(updateGameMatchCommand));
     }
+    public async Task<HttpResponseMessage> DeleteGameMatchAsync(int id)
+    {
+        return await _httpClient.DeleteAsync($"{baseUrl}/gamematches/{id}");
+    }
 }
 

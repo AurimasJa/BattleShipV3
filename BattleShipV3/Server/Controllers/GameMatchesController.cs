@@ -3,7 +3,6 @@ using BattleShipV3.Data;
 using BattleShipV3.Models;
 using BattleShipV3.Server.Repositories;
 using BattleShipV3.Shared.Data.Commands.Listing.Create;
-using BattleShipV3.Shared.Data.Commands.Listing.Get;
 using BattleShipV3.Shared.Data.Commands.Listing.Update;
 using Microsoft.AspNetCore.Mvc;
 

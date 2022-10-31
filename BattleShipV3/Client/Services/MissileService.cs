@@ -2,7 +2,6 @@
 using BattleShipV3.Data.Models;
 using BattleShipV3.Shared.Data;
 using BattleShipV3.Shared.Data.Commands.Missile.Create;
-using BattleShipV3.Shared.Data.Commands.Missile.Get;
 using BattleShipV3.Shared.Data.Commands.Missile.Update;
 using BattleShipV3.Shared.Data.Helpers;
 using Newtonsoft.Json;
@@ -40,6 +39,10 @@ public class MissileService
     public async Task<HttpResponseMessage> UpdateMissileAsync(int missileId, UpdateShipCommand updateMissileCommand)
     {
         return await _httpClient.PutAsync($"{baseUrl}/missiles/{missileId}", RequestHelper.GetStringContentFromObject(updateMissileCommand));
+    }
+    public async Task<HttpResponseMessage> DeleteMissileAsync(int id)
+    {
+        return await _httpClient.DeleteAsync($"{baseUrl}/missiles/{id}");
     }
 }
 
