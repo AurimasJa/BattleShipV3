@@ -43,16 +43,16 @@
                     </MudList>
                 </MudCardContent>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips())">Buy 4 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(0))">Buy 4 square ship</MudButton>
                 </MudCardActions>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 3 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(1))">Buy 3 square ship</MudButton>
                 </MudCardActions>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 2 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(2))">Buy 2 square ship</MudButton>
                 </MudCardActions>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 1 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(3))">Buy 1 square ship</MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
@@ -154,16 +154,16 @@
                     </MudList>
                 </MudCardContent>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 4 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(20))">Buy 4 square ship</MudButton>
                 </MudCardActions>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 3 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(21))">Buy 3 square ship</MudButton>
                 </MudCardActions>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 2 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(22))">Buy 2 square ship</MudButton>
                 </MudCardActions>
                 <MudCardActions Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Buy 1 square ship</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" OnClick="@(async () => await CreateUserShips(23))">Buy 1 square ship</MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
@@ -305,12 +305,13 @@
 
 @code {
     List<Data.Models.Ship> ships { get; set; } = new List<Data.Models.Ship>();
+    List<Data.Models.UserShip> userShips { get; set; } = new List<Data.Models.UserShip>();
 
-    protected async Task CreateUserShips()
+    protected async Task CreateUserShips(int buttonNum)
     {
         ships = await shipService.GetShipsAsync();
 
-        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, ships[0]);
+        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, ships[buttonNum]);
         await userShipsService.InsertUserShipsAsync(userShip);
         Navigation.NavigateTo("/listings");
     }
