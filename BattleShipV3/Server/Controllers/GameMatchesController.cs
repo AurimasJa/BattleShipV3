@@ -1,4 +1,5 @@
-﻿using BattleShipV3.Data;
+﻿using BattleShipV3.Client.Pages.GameMatches;
+using BattleShipV3.Data;
 using BattleShipV3.Models;
 using BattleShipV3.Server.Repositories;
 using BattleShipV3.Shared.Data.Commands.Listing.Create;
@@ -25,23 +26,37 @@ public class GameMatchesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetGameMatchCommand>> GetGameMatchAsync(int? id)
+    public async Task<ActionResult<GameMatch>> GetGameMatchAsync(int? id)
     {
         var gameMatch = await _gameMatchesRepository.GetGameMatchAsync(id);
         if (gameMatch == null)
             return NotFound($"Game Match does not exist");
 
-        return new GetGameMatchCommand(gameMatch.Id, gameMatch.CreationDate, gameMatch.GameState, gameMatch.Listing, gameMatch.User);
+        return new GameMatch
+        {
+            Id = gameMatch.Id,
+            CreationDate = gameMatch.CreationDate,
+            GameState = gameMatch.GameState,
+            Listing = gameMatch.Listing,
+            User = gameMatch.User
+        };
     }
     [HttpGet]
-    public async Task<IEnumerable<GetGameMatchCommand>> GetGameMatchesAsync()
+    public async Task<IEnumerable<GameMatch>> GetGameMatchesAsync()
     {
         var gameMatches = await _gameMatchesRepository.GetAllGameMatchesAsync();
-        return gameMatches.Select(x => new GetGameMatchCommand(x.Id, x.CreationDate, x.GameState, x.Listing, x.User));
+        return gameMatches.Select(x => new GameMatch
+        {
+            Id = x.Id,
+            CreationDate = x.CreationDate,
+            GameState = x.GameState,
+            Listing = x.Listing,
+            User = x.User
+        });
     }
 
     [HttpPost]
-    public async Task<ActionResult<GetGameMatchCommand>> CreateGameMatchAsync(CreateGameMatchCommand createGameMatchCommand)
+    public async Task<ActionResult<GameMatch>> CreateGameMatchAsync(CreateGameMatchCommand createGameMatchCommand)
     {
         //var listings = await _usersRepository.get();
         if (createGameMatchCommand == null)
@@ -60,12 +75,19 @@ public class GameMatchesController : ControllerBase
         };
 
         await _gameMatchesRepository.CreateGameMatchAsync(gameMatch);
-        return Created("", new GetGameMatchCommand(gameMatch.Id, gameMatch.CreationDate, gameMatch.GameState, gameMatch.Listing, gameMatch.User));
+        return Created("", new GameMatch
+        {
+            Id = gameMatch.Id,
+            CreationDate = gameMatch.CreationDate,
+            GameState = gameMatch.GameState,
+            Listing = gameMatch.Listing,
+            User = gameMatch.User
+        });
     }
 
     [HttpPut]
     [Route("{gameMatchId}")]
-    public async Task<ActionResult<GetListingCommand>> UpdateListingAsync(int gameMatchId, UpdateGameMatchCommand updateGameMatchCommand)
+    public async Task<ActionResult<GameMatch>> UpdateListingAsync(int gameMatchId, UpdateGameMatchCommand updateGameMatchCommand)
     {
         
         var gameMatch = await _gameMatchesRepository.GetGameMatchAsync(gameMatchId);
@@ -85,7 +107,14 @@ public class GameMatchesController : ControllerBase
 
         await _gameMatchesRepository.UpdateGameMatchAsync(gameMatch);
 
-        return Ok(new GetGameMatchCommand(gameMatch.Id, gameMatch.CreationDate, gameMatch.GameState, gameMatch.Listing, gameMatch.User));
+        return Ok(new GameMatch
+        {
+            Id = gameMatch.Id,
+            CreationDate = gameMatch.CreationDate,
+            GameState = gameMatch.GameState,
+            Listing = gameMatch.Listing,
+            User = gameMatch.User
+        });
     }
 
     [HttpDelete("{gameMatchId}")]

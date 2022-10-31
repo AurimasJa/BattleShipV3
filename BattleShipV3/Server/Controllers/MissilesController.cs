@@ -6,6 +6,7 @@ using BattleShipV3.Shared.Data.Commands.Missile.Get;
 using BattleShipV3.Shared.Data.Commands.Missile.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.Missile.Update;
+using System.Reflection;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -21,23 +22,33 @@ public class MissilesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetMissileCommand>> GetMissileAsync(int? id)
+    public async Task<ActionResult<Missile>> GetMissileAsync(int? id)
     {
         var missile = await _missilesRepository.GetMissileAsync(id);
         if (missile == null)
             return NotFound($"Listing does not exist");
 
-        return new GetMissileCommand(missile.Id, missile.Name, missile.Cooldown, missile.MissileType); // truksta user user2
+        return new Missile { 
+            Id = missile.Id,
+            Name = missile.Name,
+            Cooldown = missile.Cooldown,
+            MissileType = missile.MissileType}; // truksta user user2
     }
     [HttpGet]
-    public async Task<IEnumerable<GetMissileCommand>> GetMissilesAsync()
+    public async Task<IEnumerable<Missile>> GetMissilesAsync()
     {
         var listings = await _missilesRepository.GetAllMissilesAsync();
-        return listings.Select(x => new GetMissileCommand(x.Id, x.Name, x.Cooldown, x.MissileType));
+        return listings.Select(x => new Missile
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Cooldown = x.Cooldown,
+            MissileType = x.MissileType
+        });
     }
 
     [HttpPost]
-    public async Task<ActionResult<GetMissileCommand>> CreateMissileAsync(CreateShipCommand createMissileCommand)
+    public async Task<ActionResult<Missile>> CreateMissileAsync(CreateShipCommand createMissileCommand)
     {
         //var listings = await _usersRepository.get();
         if (createMissileCommand == null)
@@ -58,12 +69,18 @@ public class MissilesController : ControllerBase
         };
 
         await _missilesRepository.CreateMissileAsync(missile);
-        return Created("", new GetMissileCommand(missile.Id, missile.Name, missile.Cooldown, missile.MissileType));
+        return Created("", new Missile
+        {
+            Id = missile.Id,
+            Name = missile.Name,
+            Cooldown = missile.Cooldown,
+            MissileType = missile.MissileType
+        });
     }
 
     [HttpPut]
     [Route("{missileId}")]
-    public async Task<ActionResult<GetMissileCommand>> UpdateListingAsync(int missileId, UpdateShipCommand updateMissileCommand)
+    public async Task<ActionResult<Missile>> UpdateListingAsync(int missileId, UpdateShipCommand updateMissileCommand)
     {
         var missile = await _missilesRepository.GetMissileAsync(missileId);
 
@@ -79,7 +96,13 @@ public class MissilesController : ControllerBase
 
         await _missilesRepository.UpdateMissileAsync(missile);
 
-        return Ok(new GetMissileCommand(missile.Id, missile.Name, missile.Cooldown, missile.MissileType));
+        return Ok(new Missile
+        {
+            Id = missile.Id,
+            Name = missile.Name,
+            Cooldown = missile.Cooldown,
+            MissileType = missile.MissileType
+        });
     }
 
     [HttpDelete("{missileId}")]

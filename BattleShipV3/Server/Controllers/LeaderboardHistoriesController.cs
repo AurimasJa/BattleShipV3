@@ -20,23 +20,35 @@ public class LeaderboardHistoriesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetLeaderboardHistoryCommand>> GetLeaderboardHistoryAsync(int? id)
+    public async Task<ActionResult<LeaderboardHistory>> GetLeaderboardHistoryAsync(int? id)
     {
         var leaderboardHistory = await _leaderboardHistoriesRepository.GetLeaderboardHistoryAsync(id);
         if (leaderboardHistory == null)
             return NotFound($"Game Match does not exist"); //????? ?
 
-        return new GetLeaderboardHistoryCommand(leaderboardHistory.Id, leaderboardHistory.DateFrom, leaderboardHistory.DateTo, leaderboardHistory.User);
+        return new LeaderboardHistory
+        {
+            Id = leaderboardHistory.Id,
+            DateFrom = leaderboardHistory.DateFrom,
+            DateTo = leaderboardHistory.DateTo,
+            User = leaderboardHistory.User
+        };
     }
     [HttpGet]
-    public async Task<IEnumerable<GetLeaderboardHistoryCommand>> GetLeaderboardHistoriesAsync()
+    public async Task<IEnumerable<LeaderboardHistory>> GetLeaderboardHistoriesAsync()
     {
         var leaderboardHistories = await _leaderboardHistoriesRepository.GetLeaderboardHistoriesAsync();
-        return leaderboardHistories.Select(x => new GetLeaderboardHistoryCommand(x.Id, x.DateFrom, x.DateTo, x.User));
+        return leaderboardHistories.Select(x => new LeaderboardHistory
+        {
+            Id = x.Id,
+            DateFrom = x.DateFrom,
+            DateTo = x.DateTo,
+            User = x.User
+        });
     }
 
     [HttpPost]
-    public async Task<ActionResult<GetLeaderboardHistoryCommand>> CreateLeaderboardHistoryAsync(CreateLeaderboardHistoryCommand createLeaderboardHistoryCommand)
+    public async Task<ActionResult<LeaderboardHistory>> CreateLeaderboardHistoryAsync(CreateLeaderboardHistoryCommand createLeaderboardHistoryCommand)
     {
         if (createLeaderboardHistoryCommand == null)
         {
@@ -52,12 +64,18 @@ public class LeaderboardHistoriesController : ControllerBase
         };
 
         await _leaderboardHistoriesRepository.CreateLeaderboardHistoryAsync(leaderboard);
-        return Created("", new GetLeaderboardHistoryCommand(leaderboard.Id, leaderboard.DateFrom, leaderboard.DateTo, leaderboard.User));
+        return Created("", new LeaderboardHistory
+        {
+            Id = leaderboard.Id,
+            DateFrom = leaderboard.DateFrom,
+            DateTo = leaderboard.DateTo,
+            User = leaderboard.User
+        });
     }
 
     [HttpPut]
     [Route("{leaderboardHistoryId}")]
-    public async Task<ActionResult<GetLeaderboardHistoryCommand>> UpdateLeaderboardHistoryAsync(int leaderboardHistoryId, UpdateLeaderboardHistoryCommand updateLeaderboardHistoryCommand)
+    public async Task<ActionResult<LeaderboardHistory>> UpdateLeaderboardHistoryAsync(int leaderboardHistoryId, UpdateLeaderboardHistoryCommand updateLeaderboardHistoryCommand)
     {
 
         var leaderboardHistory = await _leaderboardHistoriesRepository.GetLeaderboardHistoryAsync(leaderboardHistoryId);
@@ -73,7 +91,13 @@ public class LeaderboardHistoriesController : ControllerBase
 
         await _leaderboardHistoriesRepository.UpdateLeaderboardHistoryAsync(leaderboardHistory);
 
-        return Ok(new GetLeaderboardHistoryCommand(leaderboardHistory.Id, leaderboardHistory.DateFrom, leaderboardHistory.DateTo, leaderboardHistory.User));
+        return Ok(new LeaderboardHistory
+        {
+            Id = leaderboardHistory.Id,
+            DateFrom = leaderboardHistory.DateFrom,
+            DateTo = leaderboardHistory.DateTo,
+            User = leaderboardHistory.User
+        });
     }
 
     [HttpDelete("{leaderboardHistoryId}")]

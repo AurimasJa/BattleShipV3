@@ -5,6 +5,7 @@ using BattleShipV3.Shared.Data.Commands.Listing.Get;
 using BattleShipV3.Shared.Data.Commands.Listing.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.Listing.Update;
+using System.Reflection;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -22,23 +23,41 @@ public class ListingsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetListingCommand>> GetListingAsync(int? id)
+    public async Task<ActionResult<Listing>> GetListingAsync(int? id)
     {
         var listing = await _listingsRepository.GetListingAsync(id);
         if (listing == null)
             return NotFound($"Listing does not exist");
 
-        return new GetListingCommand(listing.Id, listing.Name, listing.EloFrom, listing.EloTo, listing.CreationDate, listing.PlayerOne, listing.PlayerTwo); // truksta user user2
+        return new Listing
+        {
+            Id = listing.Id,
+            Name = listing.Name,
+            EloFrom = listing.EloFrom,
+            EloTo = listing.EloTo,
+            CreationDate = listing.CreationDate,
+            PlayerOne = listing.PlayerOne,
+            PlayerTwo = listing.PlayerTwo
+        }; // truksta user user2
     }
     [HttpGet]
-    public async Task<IEnumerable<GetListingCommand>> GetListingsAsync()
+    public async Task<IEnumerable<Listing>> GetListingsAsync()
     {
         var listings = await _listingsRepository.GetAllListingsAsync();
-        return listings.Select(x => new GetListingCommand(x.Id, x.Name, x.EloFrom, x.EloTo, x.CreationDate, x.PlayerOne, x.PlayerTwo));
+        return listings.Select(x => new Listing
+        {
+            Id = x.Id,
+            Name = x.Name,
+            EloFrom = x.EloFrom,
+            EloTo = x.EloTo,
+            CreationDate = x.CreationDate,
+            PlayerOne = x.PlayerOne,
+            PlayerTwo = x.PlayerTwo
+        });
     }
 
     [HttpPost]
-    public async Task<ActionResult<GetListingCommand>> CreateListingAsync(CreateListingCommand createListingCommand)
+    public async Task<ActionResult<Listing>> CreateListingAsync(CreateListingCommand createListingCommand)
     {
         //var listings = await _usersRepository.get();
         if (createListingCommand == null)
@@ -61,12 +80,21 @@ public class ListingsController : ControllerBase
         };
 
         await _listingsRepository.CreateListingAsync(listing);
-        return Created("", new GetListingCommand(listing.Id, listing.Name, listing.EloFrom, listing.EloTo, listing.CreationDate, listing.PlayerOne, listing.PlayerTwo));
+        return Created("", new Listing
+        {
+            Id = listing.Id,
+            Name = listing.Name,
+            EloFrom = listing.EloFrom,
+            EloTo = listing.EloTo,
+            CreationDate = listing.CreationDate,
+            PlayerOne = listing.PlayerOne,
+            PlayerTwo = listing.PlayerTwo
+        });
     }
 
     [HttpPut]
     [Route("{listingId}")]
-    public async Task<ActionResult<GetListingCommand>> UpdateListingAsync(int listingId, UpdateListingCommand updateListingCommand)
+    public async Task<ActionResult<Listing>> UpdateListingAsync(int listingId, UpdateListingCommand updateListingCommand)
     {
         var listing = await _listingsRepository.GetListingAsync(listingId);
 
@@ -83,7 +111,16 @@ public class ListingsController : ControllerBase
 
         await _listingsRepository.UpdateListingAsync(listing);
 
-        return Ok(new GetListingCommand(listing.Id, listing.Name, listing.EloFrom, listing.EloTo, listing.CreationDate, listing.PlayerOne, listing.PlayerTwo));
+        return Ok(new Listing
+        {
+            Id = listing.Id,
+            Name = listing.Name,
+            EloFrom = listing.EloFrom,
+            EloTo = listing.EloTo,
+            CreationDate = listing.CreationDate,
+            PlayerOne = listing.PlayerOne,
+            PlayerTwo = listing.PlayerTwo
+        });
     }
 
     [HttpDelete("{listingId}")]
