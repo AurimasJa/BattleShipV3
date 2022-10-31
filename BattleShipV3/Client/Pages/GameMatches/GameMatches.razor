@@ -1,5 +1,137 @@
-﻿<h3>GameMatches</h3>
+﻿@*<h3>GameMatches</h3>*@
+
+@page "/gm"
+<style>
+    rect:hover{
+        background-color:darkred;stroke-width:1;stroke:green;
+    }
+    h1 {
+        background-color: brown;
+        font-family: Tahoma, Geneva, Verdana, sans-serif;
+    }
+    h1:hover{
+        background-color:orangered;
+        font-family: Tahoma, Geneva, Verdana, sans-serif;
+    }
+    <p>testastestastestastestastestastestastestastestastestastestastestastestastestastestastestastestas</p>
+</style>
+<div>
+    <h1>aaaaaaaaaaaaaaaaaaaa</h1>
+    <svg xmlns="http://www.w3.org/2000/svg" width="280" height="200">
+
+    
+        @*<p class="errorUI">Nothing to see here right now. Sorry! MAP SETUP2</p>*@
+    @foreach(var item in Squares)
+    {
+        
+        @*<p class="errorUI">Nothing to see here right now. Sorry! MAP SETUP3 FOREACH</p>*@
+@*        if (item.Is_Ship)
+        {*@
+            <rect width="25" x="@item.X" y="@item.Y" height="25" style="fill:#226674;stroke-width:1;stroke:orangered" />
+        @*}
+        else
+        {
+            <rect width="25" x="@item.X" y="@item.Y" height="25" @onclick="@(async() => await Add(item))" style="fill:#3886c8;stroke-width:1;stroke:#000000" />
+        }*@
+    }
+</svg>
+     @*<MapSetup Squares="@squares_Player" OnComplete="@(() => { is_setup = false;})"></MapSetup>*@
+
+
+</div>
 
 @code {
+    public class Square
+    {
+        public string Id { get; set; }
+        public bool Is_Ship { get; set; }
+        public bool Is_Destroyed { get; set; }
+        public bool Is_Empty { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+    }
+    //bool ship1_complete = false;
+    //bool ship2_complete = false;
+    //bool ship3_complete = false;
+    //bool ship4_complete = false;
+    [Parameter]
+    public List<Square> Squares { get; set; }
 
+     public static Task<List<Square>> GenerateSquares()
+        {
+            var result = new List<Square>();
+            int cur_x = 0;
+            int cur_y = 0;
+
+            for (int i = 0; i < 100; i++)
+            {
+                if (i % 10 == 0)
+                {
+                    cur_x += 25;
+                    cur_y = 0;
+
+                }
+                result.Add(new Square() { Id = Guid.NewGuid().ToString(), X = cur_x, Y = cur_y });
+                cur_y += 25;
+            }
+            return Task.FromResult(result);
+        }
+    //bool is_setup = true;
+    //int status = 1;
+
+    //int livesleft_AI = 14;
+    //int livesleft_Player = 14;
+
+
+    //List<GridModels.Square> squares_AI;
+    //List<Square> squares_Player;
+
+    ////bool is_AIturn = false;
+    ////MapPlayer playermapref;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //squares_AI = await DataGenerator.GenerateSquares();
+        Squares = await GenerateSquares();
+        //await DataGenerator.GenerateShips(squares_AI);
+    }
+    //async Task ChangeTurn_FromUI(bool result)
+    //{
+    //    is_AIturn = true;
+    //    if (result)
+    //    {
+    //        livesleft_AI -= 1;
+    //    }
+    //    if(livesleft_AI == 0)
+    //    {
+    //        status = 2;
+    //        return;
+    //    }
+    //    await UI_Select();
+    //}
+
+    //async Task ChangeTurn_FromPlayer(bool result)
+    //{
+    //    is_AIturn = false;
+    //    if (result)
+    //    {
+    //        livesleft_Player -= 1;
+    //    }
+    //    if (livesleft_Player == 0)
+    //    {
+    //        status = 3;
+    //        return;
+    //    }
+    //}
+    //async Task UI_Select()
+    //{
+    //    var rand = new Random();
+    //    if(is_AIturn)
+    //    {
+    //        var availablesquares = squares_Player.Where(sp => !sp.Is_Destroyed && !sp.Is_Empty).ToList();
+    //        int indexcount = availablesquares.Count();
+    //        await playermapref.SelectSquare(availablesquares.ElementAt(rand.Next(0, indexcount)));
+    //        StateHasChanged();
+    //    }
+    //}
 }

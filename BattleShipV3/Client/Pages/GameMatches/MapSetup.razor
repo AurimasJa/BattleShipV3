@@ -1,0 +1,89 @@
+﻿<h3>MapSetup</h3>
+
+
+<p>MAP</p>
+
+        @*<p class="errorUI">Nothing to see here right now. Sorry! MAP SETUP1</p>*@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="200">
+
+    
+        @*<p class="errorUI">Nothing to see here right now. Sorry! MAP SETUP2</p>*@
+    @foreach(var item in Squares)
+    {
+        
+        @*<p class="errorUI">Nothing to see here right now. Sorry! MAP SETUP3 FOREACH</p>*@
+        if (item.Is_Ship)
+        {
+            <rect width="25" x="@item.X" y="@item.Y" height="25" style="fill:#000000;stroke-width:1;stroke:#000000" />
+        }
+        else
+        {
+            <rect width="25" x="@item.X" y="@item.Y" height="25" @onclick="@(async() => await Add(item))" style="fill:#3886c8;stroke-width:1;stroke:#000000" />
+        }
+    }
+</svg>
+
+@*<p><button @onclick="@(()=> { shiptype = 1; })">Add 5 square ship</button></p>
+<p><button @onclick="@(()=> { shiptype = 2; })">Add 4 square ship</button></p>
+<p><button @onclick="@(()=> { shiptype = 3; })">Add 3 square ship</button></p>
+<p><button @onclick="@(()=> { shiptype = 4; })">Add 2 square ship</button></p>*@
+
+
+
+@code{
+    int shiptype = 1;
+    public class Square
+    {
+        public string Id { get; set; }
+        public bool Is_Ship { get; set; }
+        public bool Is_Destroyed { get; set; }
+        public bool Is_Empty { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+    }
+    //bool ship1_complete = false;
+    //bool ship2_complete = false;
+    //bool ship3_complete = false;
+    //bool ship4_complete = false;
+    [Parameter]
+    public List<Square> Squares { get; set; }
+    [Parameter]
+    public EventCallback OnComplete { get; set; }
+
+    async Task Add(Square square)
+    {
+        //if(shiptype == 1 && !ship1_complete)
+        //{
+        //    if(await DataGenerator.AddShip(4, square , Squares))
+        //    {
+        //        ship1_complete = true;
+        //    }
+        //}
+        //if(shiptype == 2 && !ship2_complete)
+        //{
+        //    if(await DataGenerator.AddShip(3, square , Squares))
+        //    {
+        //        ship2_complete = true;
+        //    }
+        //}
+        //if(shiptype == 3 && !ship3_complete)
+        //{
+        //    if(await DataGenerator.AddShip(2, square , Squares))
+        //    {
+        //        ship3_complete = true;
+        //    }
+        //}
+        //if(shiptype == 4 && !ship4_complete)
+        //{
+        //    if(await DataGenerator.AddShip(1, square , Squares))
+        //    {
+        //        ship4_complete = true;
+        //    }
+        //}
+        //if(ship1_complete && ship2_complete && ship3_complete && ship4_complete)
+        //{
+        //    await OnComplete.InvokeAsync();
+        //}
+    }
+
+}
