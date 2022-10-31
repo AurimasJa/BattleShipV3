@@ -2,7 +2,6 @@
 using BattleShipV3.Data.Models;
 using BattleShipV3.Models;
 using BattleShipV3.Server.Repositories;
-using BattleShipV3.Shared.Data.Commands.Listing.Get;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BattleShipV3.Server.Controllers;

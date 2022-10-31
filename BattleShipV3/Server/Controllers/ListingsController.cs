@@ -1,7 +1,6 @@
 ﻿using BattleShipV3.Server.Repositories;
 using BattleShipV3.Models;
 using BattleShipV3.Shared;
-using BattleShipV3.Shared.Data.Commands.Listing.Get;
 using BattleShipV3.Shared.Data.Commands.Listing.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.Listing.Update;
