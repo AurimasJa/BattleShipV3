@@ -13,25 +13,41 @@
 @inject UserService userService
 
 
-<h3>Register</h3>
 
+<MudContainer Class="mt-12" MaxWidth="MaxWidth.Small">
+    <MudPaper Elevation="2" Class="pa-4" Style="height: 570px;">
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">Register</MudText>
+    <MudGrid Spacing="6" Class="mt-16">
+        <MudItem xs="12">
+            <MudText Typo="Typo.h5" GutterBottom="true">Your information</MudText>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField T="string" InputType="InputType.Text" @bind-Value="_userName" Label="Username" />
+                </MudItem>
 
-<MudText>Email</MudText>
-<MudInputString InputType="InputType.Email" @bind-Value="_email"></MudInputString>
+                <MudItem xs="12">
+                    <MudTextField T="string" InputType="InputType.Email" @bind-Value="_email" Label="Email" />
+                </MudItem>
 
-<MudText>UserName</MudText>
-<MudInputString @bind-Value="_userName"></MudInputString>
+                <MudItem xs="12">
+                    <MudTextField T="string" InputType="InputType.Password" @bind-Value="_password" Label="Password" />
+                </MudItem>
 
-<MudText>Password</MudText>
-<MudInputString InputType="InputType.Password" @bind-Value="_password"></MudInputString>
+                <MudItem xs="12">
+                    <MudTextField T="string" InputType="InputType.Password" @bind-Value="_passwordConfirmation" Label="Password" />
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await RegisterUser())">Register</MudButton>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Text" OnClick="NavigateToLogin">Already have an account? Login here</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
 
-<MudText>Password</MudText>
-<MudInputString InputType="InputType.Password" @bind-Value="_passwordConfirmation"></MudInputString>
-
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await RegisterUser())">Register</MudButton>
-
-<MudButton Variant="Variant.Text" OnClick="NavigateToLogin">Already have an account? Login here</MudButton>
-
+    </MudGrid>
+    </MudPaper>
+</MudContainer>
 @code {
     string _userName { get; set; }
     string _email { get; set; }

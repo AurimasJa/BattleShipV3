@@ -44,10 +44,17 @@ public class ShipsController : ControllerBase
         var ships = await _shipsRepository.GetAllShipsAsync();
         return ships.Select(x => new Ship { Id = x.Id, Name = x.Name, Length = x.Length, Missile = x.Missile });
     }
-    [HttpGet("{userId}")]
-    public async Task<IReadOnlyList<Ship>> GetAllUserShipsAsync(int? userId, bool? selected)
+    [HttpGet]
+    public async Task<IEnumerable<Ship>> GetAllUserShipsAsync(int userId)
     {
-        return await _shipsRepository.GetAllOneUserShipsAsync(userId.Value, selected);
+        var ships = await _shipsRepository.GetAllOneUserShipsAsync(userId);
+        return ships.Select(x => new Ship
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Length = x.Length,
+            Missile = x.Missile
+        });
     }
 
     [HttpPost]

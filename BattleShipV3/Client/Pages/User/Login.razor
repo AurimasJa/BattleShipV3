@@ -5,6 +5,7 @@
 @using Radzen.Blazor
 @using Models
 @using BattleShipV3.Shared
+@using System.Net
 
 @inject ToastService toastService
 @inject NavigationManager navigation
@@ -12,25 +13,40 @@
 
 @inject UserService userService
 
-<h3>Login</h3>
 
-<MudText>Email</MudText>
-<MudInputString InputType="InputType.Email" @bind-Value="_email"></MudInputString>
+<MudContainer Class="mt-12" MaxWidth="MaxWidth.Small">
+    <MudPaper Elevation="2" Class="pa-4" Style="height: 400px;">
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">Login</MudText>
+    <MudGrid Spacing="6" Class="mt-16">
+        <MudItem xs="12">
+            <MudText Typo="Typo.h5" GutterBottom="true">Your information</MudText>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField T="string" InputType="InputType.Email" @bind-Value="_email" Label="Email" />
+                </MudItem>
 
-<MudText>Password</MudText>
-<MudInputString InputType="InputType.Password" @bind-Value="_password"></MudInputString>
+                <MudItem xs="12">
+                    <MudTextField T="string" InputType="InputType.Password" @bind-Value="_password" Label="Password" />
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await LoginUser())">Login</MudButton>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Text" OnClick="NavigateToRegister">Don't have an account? Register here</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await LoginUser())">Login</MudButton>
-
-<MudButton Variant="Variant.Text" OnClick="NavigateToRegister">Don't have an account? Register here</MudButton>
-
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
 @code {
     string _email { get; set; }
     string _password { get; set; }
 
     protected async Task OnInitializedAsync()
     {
-        
+
     }
 
     protected async Task LoginUser()
@@ -40,7 +56,9 @@
             await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
             var user = await userService.GetUserAsync(_email);
-
+            if (user == null)
+                return;
+            
             if (user.Password != _password)
                 return;
 
@@ -49,12 +67,15 @@
             await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
             navigation.NavigateTo("/");
+            
+            
 
         }
         else
         {
-            await Task.Run(() => toastService.ShowToast("Info", Data.Enums.ToastLevel.Error));
-            await toastService.ShowToastAsync("Info", Data.Enums.ToastLevel.Error);
+            await Console.Out.WriteLineAsync("Neveikia");
+            //await Task.Run(() => toastService.ShowToast("Info", Data.Enums.ToastLevel.Error));
+            //await toastService.ShowToastAsync("Info", Data.Enums.ToastLevel.Error);
         }
     }
 
