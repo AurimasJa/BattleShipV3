@@ -30,15 +30,15 @@ public class ShipsController : ControllerBase
         _usersRepository = userRepository;
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Ship>> GetShipAsync(int? id)
-    {
-        var ship = await _shipsRepository.GetShipAsync(id);
-        if (ship == null)
-            return NotFound($"Ship does not exist");
+    //[HttpGet("{id}")]
+    //public async Task<ActionResult<Ship>> GetShipAsync(int? id)
+    //{
+    //    var ship = await _shipsRepository.GetShipAsync(id);
+    //    if (ship == null)
+    //        return NotFound($"Ship does not exist");
 
-        return new Ship { Id = ship.Id, Name = ship.Name, Length = ship.Length, Missile = ship.Missile }; // truksta user user2
-    }
+    //    return new Ship { Id = ship.Id, Name = ship.Name, Length = ship.Length, Missile = ship.Missile }; // truksta user user2
+    //}
     [HttpGet]
     public async Task<IEnumerable<Ship>> GetShipsAsync()
     {

@@ -212,8 +212,8 @@
 @code {
     List<Ship> ownedShips { get; set; }
 
-    List<Ship> ships { get; set; } = new List<Ship>();
-    List<UserShip> userShips { get; set; } = new List<UserShip>();
+    List<Ship> ships { get; set; }
+    List<UserShip> userShips { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
