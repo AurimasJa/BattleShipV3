@@ -37,15 +37,9 @@ namespace BattleShipV3.Server.Repositories
 
         public async Task<IReadOnlyList<Ship>> GetAllShipsAsync()
         {
-
             return await _battleshipDbContext.Ships.
                 Include(e => e.Missile).
                 ToListAsync();
-        }
-
-        public async Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId, bool? selected)
-        {
-            return selected == true ? await GetSelectedShips(userId) : await GetOwnedShips(userId);
         }
 
         public async Task RemoveUserSelectedShipAsync(int userId, int shipId)
@@ -56,6 +50,11 @@ namespace BattleShipV3.Server.Repositories
                 .FirstOrDefaultAsync(e => e.User.Id == userId && e.Ship.Id == shipId);
             _battleshipDbContext.UserSelectedShips.Remove(uss);
             await _battleshipDbContext.SaveChangesAsync();
+        }
+
+        public async Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId, bool? selected)
+        {
+            return selected == true ? await GetSelectedShips(userId) : await GetOwnedShips(userId);
         }
 
         private async Task<IReadOnlyList<Ship>> GetOwnedShips(int userId)
@@ -78,13 +77,7 @@ namespace BattleShipV3.Server.Repositories
 
             return await _battleshipDbContext.Ships.Where(o => shipids.Contains(o.Id) && !selectedShipIds.Contains(o.Id)).ToListAsync();
         }
-
-        public async Task CreateUserSelectedShipAsync(UserSelectedShip uss)
-        {
-            _battleshipDbContext.UserSelectedShips.Add(uss);
-            await _battleshipDbContext.SaveChangesAsync();
-        }
-
+        
         private async Task<IReadOnlyList<Ship>> GetSelectedShips(int userId)
         {
             var local = await _battleshipDbContext.UserSelectedShips
@@ -95,6 +88,12 @@ namespace BattleShipV3.Server.Repositories
             var shipids = local.Select(o => o.Ship.Id).ToHashSet();
 
             return await _battleshipDbContext.Ships.Where(o => shipids.Contains(o.Id)).ToListAsync();
+        }
+
+        public async Task CreateUserSelectedShipAsync(UserSelectedShip uss)
+        {
+            _battleshipDbContext.UserSelectedShips.Add(uss);
+            await _battleshipDbContext.SaveChangesAsync();
         }
 
         public async Task<Ship?> GetShipAsync(int? shipId)
