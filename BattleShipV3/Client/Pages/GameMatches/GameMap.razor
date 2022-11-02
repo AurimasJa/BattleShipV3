@@ -17,12 +17,12 @@
                             <MudItem Style="margin-bottom:5px">
                                 @if(actualMap.playField[i][j].squareType == SquareType.SHIP)
                                 {
-                                    <MudPaper @onclick="() => OnClickGridPaper(i,j,false)" Style="@ColorEnumToHex(actualMap.playField[i][j].ship)"
+                                    <MudPaper @onclick="async () => await OnClickGridPaper(i,j,false)" Style="@ColorEnumToHex(actualMap.playField[i][j].ship)"
                                         Square="true" Height="25px" Width="25px"></MudPaper>
                                 }
                                 else
                                 {
-                                    <MudPaper @onclick="() => OnClickGridPaper(i,j,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                    <MudPaper @onclick="async () => await OnClickGridPaper(i,j,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
                                 }
                                 
                             </MudItem>
@@ -80,7 +80,7 @@
         actualMap = new ActualMap();
     }
 
-    public void OnClickGridPaper(int x, int y, bool isShooting)
+    public async Task OnClickGridPaper(int x, int y, bool isShooting)
     {
         if(gamePhase == GamePhase.LAYOUT && !isShooting)
         {
