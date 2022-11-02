@@ -15,7 +15,7 @@
 
 <PageTitle>Points shop</PageTitle>
 
-<MudContainer>
+@*<MudContainer>
     <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">Welcome to the shop!</MudText>
     <MudText Typo="Typo.h5" Align="Align.Center">Here you can spend your hard earned points to improve your gameplay experience.</MudText>
     <MudText Class="pa-8 ma-8" Typo="Typo.h3" Align="Align.Center" GutterBottom="true">Ships</MudText>
@@ -206,14 +206,74 @@
             </MudCard>
         </MudItem>
     </MudGrid>
-</MudContainer>
+</MudContainer>*@
 
+@*OnClick="@(async () => await CreateUserShips())"
+    @onclick="() => SetTimer(timer.Id)"
+<MudTh><MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Style="width:50%;" @onclick="@BuyShip" @bind-SelectedItem="selectedShip">Buy ship</MudButton></MudTh>
+*@
+
+<MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">Welcome to the shop!</MudText>
+<MudText Typo="Typo.h5" Align="Align.Center">Here you can spend your hard earned points to improve your gameplay experience.</MudText>
+<br />
+<MudTable Items="@ownedShips" Hover="true" Striped="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Owned ships</MudText>
+        <MudSpacer />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Ship Name</MudTh>
+        <MudTh>Ship Length</MudTh>
+        <MudTh>Special</MudTh>
+        <MudTh>Special Bonus</MudTh>
+        <MudTh>Missile Type</MudTh>
+        <MudTh>Missile Cooldown</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTh>@context.Name</MudTh>
+        <MudTh>@context.Length</MudTh>
+        <MudTh>@context.GetSpecialtyName()</MudTh>
+        <MudTh>@context.GetSpecialtyBonus()</MudTh>
+        <MudTh>@context.Missile.MissileType</MudTh>
+        <MudTh>@context.Missile.Cooldown</MudTh>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+
+</MudTable>
+<br/>
+@*Filter="new Func<Ship,bool>(FilterFunc)"*@
+<MudTable Items="@ships" Hover="true" @bind-SelectedItem="selectedShip" @onclick="@BuyShip">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Ships</MudText>
+        <MudSpacer />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Ship Name</MudTh>
+        <MudTh>Ship Length</MudTh>
+        <MudTh>Special</MudTh>
+        <MudTh>Special Bonus</MudTh>
+        <MudTh>Missile Type</MudTh>
+        <MudTh>Missile Cooldown</MudTh>
+        <MudTh>Price</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTh>@context.Name</MudTh>
+        <MudTh>@context.Length</MudTh>
+        <MudTh>@context.GetSpecialtyName()</MudTh>
+        <MudTh>@context.GetSpecialtyBonus()</MudTh>
+        <MudTh>@context.Missile.MissileType</MudTh>
+        <MudTh>@context.Missile.Cooldown</MudTh>
+        <MudTh>555</MudTh>
+    </RowTemplate>
+
+</MudTable>
 
 @code {
     List<Ship> ownedShips { get; set; }
-
     List<Ship> ships { get; set; }
-    List<UserShip> userShips { get; set; }
+    Ship selectedShip { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -229,20 +289,19 @@
         StateHasChanged();
     }
 
-    protected async Task CreateUserShips(int buttonNum)
+    protected async Task BuyShip()
     {
-        ships = await shipService.GetShipsAsync();
+        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, selectedShip);
+        await userShipsService.InsertUserShipsAsync(userShip);
+        ownedShips.Add(selectedShip);
 
-        switch (buttonNum)
-        {
-            case 1:
-                Data.Models.Ship newShip = ships.FirstOrDefault(e => e.Name == "healerSimple" && e.Length == 4);
-                CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, newShip);
-                await userShipsService.InsertUserShipsAsync(userShip);
-                break;
-        }
-        //CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, ships[buttonNum]);
-        //await userShipsService.InsertUserShipsAsync(userShip);
-        Navigation.NavigateTo("/listings");
+        await InvokeAsync(StateHasChanged);
     }
+
+    //private bool FilterFunc(Ship element)
+    //{
+    //    if (ownedShips.Any(e => e.Id == element.Id))
+    //        return true;
+    //    return false;
+    //}
 }

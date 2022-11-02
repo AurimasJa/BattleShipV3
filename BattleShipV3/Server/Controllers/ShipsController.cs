@@ -39,10 +39,17 @@ public class ShipsController : ControllerBase
 
     //    return new Ship { Id = ship.Id, Name = ship.Name, Length = ship.Length, Missile = ship.Missile }; // truksta user user2
     //}
+    //[HttpGet]
+    //public async Task<IEnumerable<Ship>> GetShipsAsync()
+    //{
+    //    return await _shipsRepository.GetAllShipsAsync();
+    //}
     [HttpGet]
-    public async Task<IEnumerable<Ship>> GetShipsAsync()
+    public async Task<string> GetShipsAsync()
     {
-        return await _shipsRepository.GetAllShipsAsync();
+        var ships = await _shipsRepository.GetAllShipsAsync();
+        var json = Newtonsoft.Json.JsonConvert.SerializeObject(ships);
+        return json;
     }
     [HttpGet("{userId}")]
     public async Task<string> GetAllUserShipsAsync(int? userId, bool? selected)

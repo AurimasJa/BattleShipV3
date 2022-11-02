@@ -21,16 +21,30 @@ namespace BattleShipV3.Server.Controllers
             _shipsRepository = shipsRepository;
         }
 
+        //[HttpGet]
+        //public async Task<IEnumerable<UserShip>> GetUserShipsAsync()
+        //{
+        //    var userShips = await _userShipsRepository.GetAllUserShipsAsync();
+        //    return userShips.Select(x => new UserShip
+        //    {
+        //        Id = x.Id,
+        //        Ship = x.Ship,
+        //        User = x.User
+        //    });
+        //}
+
         [HttpGet]
-        public async Task<IEnumerable<UserShip>> GetUserShipsAsync()
+        public async Task<string> GetUserShipsAsync()
         {
             var userShips = await _userShipsRepository.GetAllUserShipsAsync();
-            return userShips.Select(x => new UserShip
+            var selected = userShips.Select(x => new UserShip
             {
                 Id = x.Id,
                 Ship = x.Ship,
                 User = x.User
             });
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(selected);
+            return json;
         }
 
         [HttpPost]
