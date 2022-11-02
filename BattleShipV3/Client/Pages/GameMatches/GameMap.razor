@@ -11,18 +11,20 @@
             <MudGrid Spacing="1">
                 @for(int i = 0; i < 10; i++)
                 {
+                    int x = i;
                     <MudItem>
                         @for(int j = 0; j < 10; j++)
                             {
+                            int y = j;
                             <MudItem Style="margin-bottom:5px">
-                                @if(actualMap.playField[i][j].squareType == SquareType.SHIP)
+                                @if(actualMap.playField[x][y].squareType == SquareType.SHIP)
                                 {
-                                    <MudPaper @onclick="async () => await OnClickGridPaper(i,j,false)" Style="@ColorEnumToHex(actualMap.playField[i][j].ship)"
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="@ColorEnumToHex(actualMap.playField[x][y].ship)"
                                         Square="true" Height="25px" Width="25px"></MudPaper>
                                 }
                                 else
                                 {
-                                    <MudPaper @onclick="async () => await OnClickGridPaper(i,j,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
                                 }
                                 
                             </MudItem>
@@ -75,12 +77,14 @@
 
     ActualMap actualMap;
 
+    public List<int> Ids = Enumerable.Range(0, 99).ToList();
+
     protected override async Task OnInitializedAsync()
     {
         actualMap = new ActualMap();
     }
 
-    public async Task OnClickGridPaper(int x, int y, bool isShooting)
+    public void OnClickGridPaper(int x, int y, bool isShooting)
     {
         if(gamePhase == GamePhase.LAYOUT && !isShooting)
         {
