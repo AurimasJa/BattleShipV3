@@ -7,23 +7,9 @@
 
 
 @page "/gm"
-<style>
-    rect {
-        fill:#226674;stroke-width:1;stroke:orangered;
-    }
-    rect:hover{
-        fill:#3886c8;stroke-width:1;stroke:#000000;
-    }
-    h1 {
-        background-color: brown;font-family: Tahoma, Geneva, Verdana, sans-serif;
-    }
-    h1:hover{
-        background-color:orangered;font-family: Tahoma, Geneva, Verdana, sans-serif;
-    }
-</style>
+
 
 <div> 
-    <p>testastestastestastestastestastestastestastestastestastestastestastestastestastestastestastestas</p>
     <h1>aaaaaaaaaaaaaaaaaaaa</h1>
     <svg xmlns="http://www.w3.org/2000/svg" width="280" height="200">
 
@@ -33,7 +19,7 @@
     {
         
         <p class="errorUI">Nothing to see here right now. Sorry! MAP SETUP3 FOREACH</p>
-        if (!item.Is_Ship)
+        if (item.Is_Ship)
         {
             <rect width="25" x="@item.X" y="@item.Y" height="25" style="fill:darkred;stroke-width:1;stroke:orangered" />
         }
@@ -43,7 +29,7 @@
         }
     }
 </svg>
-     @*<GameMatches Squares="@squares_Player" OnComplete="@(() => { is_setup = false;})"></GameMatches>*@
+     @*<GameMatches Squares="@Squares" OnComplete="@(() => { is_setup = false;})"></GameMatches>*@
 
 
 </div>
@@ -54,6 +40,7 @@
 
 @code {
     int shiptype = 1;
+    //bool is_setup = true;
     bool ship1_complete = false;
     bool ship2_complete = false;
     bool ship3_complete = false;
@@ -82,34 +69,7 @@
         }
         return Task.FromResult(result);
     }
-    //bool is_setup = true;
-    //int status = 1;
 
-    //int livesleft_AI = 14;
-    //int livesleft_Player = 14;
-
-
-    //List<GridModels.Square> squares_AI;
-    //List<Square> squares_Player;
-
-    ////bool is_AIturn = false;
-    ////MapPlayer playermapref;
-
-
-    //async Task ChangeTurn_FromUI(bool result)
-    //{
-    //    is_AIturn = true;
-    //    if (result)
-    //    {
-    //        livesleft_AI -= 1;
-    //    }
-    //    if(livesleft_AI == 0)
-    //    {
-    //        status = 2;
-    //        return;
-    //    }
-    //    await UI_Select();
-    //}
 
 
     async Task Add(GridModels.Square square)
@@ -144,14 +104,55 @@
         }
         if (ship1_complete && ship2_complete && ship3_complete && ship4_complete)
         {
+            Console.WriteLine("ONCOMPLETE");
             await OnComplete.InvokeAsync();
         }
-    } 
+    }
     protected override async Task OnInitializedAsync()
-        {
-            //squares_AI = await DataGenerator.GenerateSquares();
-            Squares = await GenerateSquares();
-            //await DataGenerator.GenerateShips(squares_AI);
-        }
+    {
+        //squares_AI = await DataGenerator.GenerateSquares();
+        Squares = await GenerateSquares();
+        //await DataGenerator.GenerateShips(squares_AI);
     }
 }
+  @*  int status = 1;
+
+    int livesleft_AI = 14;
+    int livesleft_Player = 14;
+
+
+    List<GridModels.Square> squares_AI;
+    List<Square> squares_Player;
+
+    //bool is_AIturn = false;
+    //MapPlayer playermapref;
+
+
+    async Task ChangeTurn_FromUI(bool result)
+    {
+        is_AIturn = true;
+        if (result)
+        {
+            livesleft_AI -= 1;
+        }
+        if(livesleft_AI == 0)
+        {
+            status = 2;
+            return;
+        }
+        await UI_Select();
+    }*@
+@*<style>
+    rect {
+        fill:#226674;stroke-width:1;stroke:orangered;
+    }
+    rect:hover{
+        fill:#3886c8;stroke-width:1;stroke:#000000;
+    }
+    h1 {
+        background-color: brown;font-family: Tahoma, Geneva, Verdana, sans-serif;
+    }
+    h1:hover{
+        background-color:orangered;font-family: Tahoma, Geneva, Verdana, sans-serif;
+    }
+</style>*@
