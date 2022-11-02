@@ -2,6 +2,7 @@
 
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data
+@using BattleShipV3.Data.Models
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
 @using MudBlazor
@@ -209,8 +210,24 @@
 
 
 @code {
-    List<Data.Models.Ship> ships { get; set; } = new List<Data.Models.Ship>();
-    List<Data.Models.UserShip> userShips { get; set; } = new List<Data.Models.UserShip>();
+    List<Ship> ownedShips { get; set; }
+
+    List<Ship> ships { get; set; } = new List<Ship>();
+    List<UserShip> userShips { get; set; } = new List<UserShip>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Global.CurrentUser is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        ownedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id);
+        ships = await shipService.GetShipsAsync();
+
+        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
+    }
 
     protected async Task CreateUserShips(int buttonNum)
     {
