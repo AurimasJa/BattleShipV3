@@ -7,11 +7,13 @@ namespace BattleShipV3.Server.Repositories
     public interface IShipsRepository
     {
         Task CreateShipAsync(Ship ship);
+        Task CreateUserSelectedShipAsync(UserSelectedShip uss);
         Task DeleteShipAsync(Ship ship);
-        Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId);
+        Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId, bool? selected);
         Task<IReadOnlyList<Ship>> GetAllShipsAsync();
         Task<Ship?> GetShipAsync(int? shipId);
         Task UpdateShipAsync(Ship ship);
+        Task RemoveUserSelectedShipAsync(int userId, int shipId);
     }
 
     // TURI BUTI SHIP->PAIMA VISUS SHIPS sutikrines su UserShips
@@ -41,16 +43,60 @@ namespace BattleShipV3.Server.Repositories
                 ToListAsync();
         }
 
-        public async Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId)
+        public async Task<IReadOnlyList<Ship>> GetAllOneUserShipsAsync(int userId, bool? selected)
         {
-            var local = await _battleshipDbContext.UserShips
+            return selected == true ? await GetSelectedShips(userId) : await GetOwnedShips(userId);
+        }
+
+        public async Task RemoveUserSelectedShipAsync(int userId, int shipId)
+        {
+            var uss = await _battleshipDbContext.UserSelectedShips
+                 .Include(e => e.User)
+                 .Include(e => e.Ship)
+                .FirstOrDefaultAsync(e => e.User.Id == userId && e.Ship.Id == shipId);
+            _battleshipDbContext.UserSelectedShips.Remove(uss);
+            await _battleshipDbContext.SaveChangesAsync();
+        }
+
+        private async Task<IReadOnlyList<Ship>> GetOwnedShips(int userId)
+        {
+            var userSelectedShips = await _battleshipDbContext.UserSelectedShips
+                                    .Include(e => e.User)
+                                    .Include(e => e.Ship)
+                                    .Where(e => e.User.Id == userId)
+                                    .AsNoTracking()
+                                    .ToListAsync();
+
+            var selectedShipIds = userSelectedShips.Select(e => e.Ship.Id).ToHashSet();
+
+            var userShips = await _battleshipDbContext.UserShips
+                .Include(e => e.User)
+                .Include(e => e.Ship)
+                    .ThenInclude(e => e.Missile)
+                .Where(o => o.User.Id == userId).ToListAsync();
+            var shipids = userShips.Select(o => o.Ship.Id).ToHashSet();
+
+            return await _battleshipDbContext.Ships.Where(o => shipids.Contains(o.Id) && !selectedShipIds.Contains(o.Id)).ToListAsync();
+        }
+
+        public async Task CreateUserSelectedShipAsync(UserSelectedShip uss)
+        {
+            _battleshipDbContext.UserSelectedShips.Add(uss);
+            await _battleshipDbContext.SaveChangesAsync();
+        }
+
+        private async Task<IReadOnlyList<Ship>> GetSelectedShips(int userId)
+        {
+            var local = await _battleshipDbContext.UserSelectedShips
+                .Include(e => e.User)
+                .Include(e => e.Ship)
+                    .ThenInclude(e => e.Missile)
                 .Where(o => o.User.Id == userId).ToListAsync();
             var shipids = local.Select(o => o.Ship.Id).ToHashSet();
 
-
-
             return await _battleshipDbContext.Ships.Where(o => shipids.Contains(o.Id)).ToListAsync();
         }
+
         public async Task<Ship?> GetShipAsync(int? shipId)
         {
             return await _battleshipDbContext.Ships.

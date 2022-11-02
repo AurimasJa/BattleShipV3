@@ -30,5 +30,10 @@ namespace BattleShipV3.Client.Services
             var json = await _httpClient.PostAsync($"{baseUrl}/pointsshop", RequestHelper.GetStringContentFromObject(createUserShipsCommand));
             return JsonConvert.DeserializeObject<UserShip>(await json.Content.ReadAsStringAsync());
         }
+
+        public async Task RemoveUserSelectedShip(int userId, int shipId)
+        {
+            var json = await _httpClient.DeleteAsync($"{baseUrl}/ships?userId={userId}&shipId={shipId}");
+        }
     }
 }
