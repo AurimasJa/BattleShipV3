@@ -1,0 +1,106 @@
+﻿@page "/GameMatch/{PlayerOneId:int}/{PlayerTwoId:int}"
+@*@page "/GameMatches/{GameMatchId:int}/{PlayerOneId:int}/{PlayerTwoId:int}"*@
+@using BattleShipV3.Client.DesignPatterns.Builder
+@using BattleShipV3.Data.Models
+@using BattleShipV3.Shared
+@using BattleShipV3.Shared.Data.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@using static BattleShipV3.Data.Enums
+
+@inject UserService userService;
+@inject ShipService shipService;
+@inject NavigationManager navigation;
+
+<h3>GameMatches</h3>
+
+@if(PlayerOne != null && PlayerOne.User != null && PlayerOne.Ships != null)
+{
+    <GameMap gamePhase="@gamePhase" Player="@PlayerOne" >
+
+    </GameMap>
+}
+
+
+
+@code {
+
+    //[Parameter] 
+    //public int GameMatchId { get; set; }
+    [Parameter] 
+    public int PlayerOneId { get; set; }
+    [Parameter] 
+    public int PlayerTwoId { get; set; }
+
+    GamePlayerModel PlayerOne { get; set; }
+    GamePlayerModel PlayerTwo { get; set; }
+
+    HubConnection? hubConnection { get; set; }
+
+    public GamePhase gamePhase;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Global.CurrentUser is null || (Global.CurrentUser.Id != PlayerOneId && Global.CurrentUser.Id != PlayerTwoId))
+            navigation.NavigateTo("/");
+
+        gamePhase = GamePhase.LAYOUT;
+        await LoadPlayersData();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task LoadPlayersData()
+    {
+        PlayerOne = new GamePlayerModel();
+        PlayerTwo = new GamePlayerModel();
+
+        PlayerOne.User = await userService.GetUserAsync(PlayerOneId);
+        PlayerTwo.User = await userService.GetUserAsync(PlayerTwoId);
+
+        var playerOneShips = await shipService.GetShipsByUserAsync(PlayerOneId, true);
+        var playerTwoShips = await shipService.GetShipsByUserAsync(PlayerTwoId, true);
+
+        BuildShips(PlayerOne, playerOneShips);
+        BuildShips(PlayerTwo, playerTwoShips);
+    }
+
+    public void AssignDefaultRotations(List<Ship> ships)
+    {
+        foreach (var item in ships)
+        {
+            item.Rotation = ShipRotation.HORIZONTAL;
+        }
+    }
+
+    public void BuildShips(GamePlayerModel player, List<Ship> ships)
+    {
+        List<Ship> builtShips = new List<Ship>();
+        foreach (var item in ships)
+        {
+            ShipBuilder shipBuilder;
+            switch(item)
+            {
+                case Healer:
+                    shipBuilder = new HealerShipBuilder();
+                    shipBuilder.startNew(item);
+                    shipBuilder.BuildShipColor();
+                    break;
+
+                case Submarine:
+                    shipBuilder = new SubmarineShipBuilder();
+                    shipBuilder.startNew(item);
+                    shipBuilder.BuildShipColor();
+                    break;
+
+                default:
+                    shipBuilder = new BasicShipBuilder();
+                    shipBuilder.startNew(item);
+                    shipBuilder.BuildShipColor();
+                    break;
+            }
+            builtShips.Add(shipBuilder.GetBuildable());
+        }
+
+        player.Ships = builtShips;
+    }
+
+}

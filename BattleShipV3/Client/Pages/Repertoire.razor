@@ -44,7 +44,8 @@
 
 <hr />
 
-<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="selectedOwnedShip == null || selectedShips.Any(e => e.Length == selectedOwnedShip.Length) || selectedShips.Count >= 4" @onclick="AddShip" Style="margin:5px">Select</MudButton>
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="selectedOwnedShip == null || selectedShips.Any(e => e.Length == selectedOwnedShip.Length) || selectedShips.Count >= 4" 
+    @onclick="AddShip" Style="margin:5px">Select</MudButton>
 
 <MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
     <ToolBarContent>

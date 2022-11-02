@@ -1,8 +1,10 @@
 ﻿@page "/listingslist"
 
+@using BattleShipV3.Client.DesignPatterns.Singleton
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.Listing.Create
 @using BattleShipV3.Shared.Data.Commands.Listing.Update
+@using BattleShipV3.Shared.Data.Interfaces
 @using Microsoft.AspNetCore.SignalR.Client
 @using MudBlazor
 @using Models
@@ -14,6 +16,12 @@
 
 
 @implements IAsyncDisposable
+@implements IObserver
+
+
+<MudText>
+    Online users: @OnlinePlayersSingleton.OnlineUsers.Count
+</MudText>
 
 @if(Global.CurrentUser != null)
 {
@@ -128,6 +136,12 @@
             InvokeAsync(StateHasChanged);
         });
 
+        hubConnection.On<User>("UserLoggedIn", (user) =>
+        {
+            OnlinePlayersSingleton.OnlineUsers.Add(user);
+            Console.WriteLine(OnlinePlayersSingleton.OnlineUsers.Count);
+            InvokeAsync(StateHasChanged);
+        });
 
         await hubConnection.StartAsync();
 
@@ -208,4 +222,10 @@
             await hubConnection.DisposeAsync();
         }
     }
+
+    public void Update(ISubject subject)
+    {
+        Console.WriteLine("ConcreteObserverA: Reacted to the event.");
+    }
+
 }

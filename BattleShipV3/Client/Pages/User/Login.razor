@@ -1,6 +1,8 @@
 ﻿@page "/login"
 
+@using BattleShipV3.Client.DesignPatterns.Singleton
 @using BattleShipV3.Shared.Data.Commands.User.Create
+@using Microsoft.AspNetCore.SignalR.Client
 @using MudBlazor;
 @using Radzen.Blazor
 @using Models
@@ -44,9 +46,16 @@
     string _email { get; set; }
     string _password { get; set; }
 
-    protected async Task OnInitializedAsync()
-    {
+    private HubConnection? hubConnection;
 
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+                .WithUrl(navigation.ToAbsoluteUri("/lobbyhub"))
+                .WithAutomaticReconnect()
+                .Build();
+
+        await hubConnection.StartAsync();
     }
 
     protected async Task LoginUser()
@@ -58,7 +67,7 @@
             var user = await userService.GetUserAsync(_email);
             if (user == null)
                 return;
-            
+
             if (user.Password != _password)
                 return;
 
@@ -66,10 +75,11 @@
             //TOAST NEVEIKIA
             await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
-            navigation.NavigateTo("/");
+            OnlinePlayersSingleton.OnlineUsers.Add(user);
             
-            
+            await hubConnection.SendAsync("UserLoggedIn", user);
 
+            navigation.NavigateTo("/");
         }
         else
         {

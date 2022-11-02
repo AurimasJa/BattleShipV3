@@ -2,6 +2,7 @@
 using BattleShipV3.Data.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using BattleShipV3.Shared.Data.Interfaces;
 
 namespace BattleShipV3.Models
 {

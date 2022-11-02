@@ -1,0 +1,198 @@
+﻿@using BattleShipV3.Data.Models
+@using BattleShipV3.Shared.Data.Models
+@using static BattleShipV3.Data.Enums
+
+<h3>Map</h3>
+
+@if(Player != null && Player.User != null && Player.Ships != null && actualMap != null)
+{
+    <MudItem>
+        <MudItem Style="display: inline-block; left:0px; position: relative">
+            <MudGrid Spacing="1">
+                @for(int i = 0; i < 10; i++)
+                {
+                    <MudItem>
+                        @for(int j = 0; j < 10; j++)
+                            {
+                            <MudItem Style="margin-bottom:5px">
+                                @if(actualMap.playField[i][j].squareType == SquareType.SHIP)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(i,j,false)" Style="@ColorEnumToHex(actualMap.playField[i][j].ship)"
+                                        Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                else
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(i,j,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                }
+                                
+                            </MudItem>
+                            }
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudItem>
+
+        <MudItem Style="display: inline-block; right:0px; position: absolute">
+            <MudGrid Spacing="1">
+                @for(int i = 0; i< 10; i++)
+                {
+                    <MudItem >
+                        @for(int j = 0; j < 10; j++)
+                            {
+                            <MudItem Style="margin-bottom:5px">
+                                <MudPaper @onclick="() => OnClickGridPaper(i,j, true)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                            </MudItem>
+                            }
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudItem>
+
+    </MudItem>
+
+    @foreach (var item in Player.Ships)
+    {
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => SelectShip(item)"
+            Disabled="selectedShip != null && item.Id == selectedShip.Id" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
+    }
+
+    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => Rotate(selectedShip)"
+            Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
+}
+
+
+
+@code {
+
+    [Parameter] public GamePhase gamePhase { get; set; }
+    [Parameter] public GamePlayerModel Player { get; set; }
+    //[Parameter] public BattleShipV3.Models.User User { get; set; }
+    //[Parameter] public List< Player { get; set; }
+
+    Ship selectedShip;
+
+    List<Ship> PlacedShips = new List<Ship>();
+
+    ActualMap actualMap;
+
+    protected override async Task OnInitializedAsync()
+    {
+        actualMap = new ActualMap();
+    }
+
+    public void OnClickGridPaper(int x, int y, bool isShooting)
+    {
+        if(gamePhase == GamePhase.LAYOUT && !isShooting)
+        {
+            PlaceShip(x, y);
+        }
+        else
+        {
+            //TODO SHOOT MISSILE
+        }
+    }
+
+    public void SelectShip(Ship context)
+    {
+        this.selectedShip = context;
+    }
+
+    public void Rotate(Ship? context)
+    {
+        this.selectedShip = context;
+    }
+
+    public void PlaceShip(int x, int y)
+    {
+        Console.WriteLine($"{x}:{y}");
+        if (selectedShip is null)
+            return;
+
+        if (selectedShip.Rotation == ShipRotation.HORIZONTAL && selectedShip.Length + x > 10)
+            return;
+
+        if (selectedShip.Rotation == ShipRotation.VERTICAL && selectedShip.Length + y > 10)
+            return;
+
+        Console.WriteLine($"After checks");
+        actualMap.PlaceShip(selectedShip, x, y);
+        StateHasChanged();
+        Console.WriteLine($"Fin");
+    }
+
+    public string ColorEnumToHex(Ship context)
+    {
+        if(context.Color == ShipColor.WHITE)
+        {
+            return "background:#BDBDBD";
+        }
+        else if(context.Color == ShipColor.BLUE)
+        {
+            return "background:#1565C0";
+        }
+        else if(context.Color == ShipColor.GREEN)
+        {
+            return "background:#7CB342";
+        }
+        return "XD";
+    }
+
+    class ActualMap
+    {
+        //public Square[,] playField { get; set; }
+        public List<Square[]> playField { get; set; }
+
+        public ActualMap()
+        {
+            playField = new List<Square[]>();
+            for (var i = 0; i < 11; i++)
+            {
+                playField.Add(new Square[11]);
+
+                for (var j = 0; j < 11; j++)
+                {
+                    playField[i][j] = new Square(SquareType.NONE, null);
+                }
+            }
+        }
+
+        public void PlaceShip(Ship ship, int x, int y)
+        {
+            for (var i = 0; i < ship.Length; i++)
+            {
+                if(ship.Rotation == ShipRotation.HORIZONTAL)
+                {
+                    playField[x + i][y].AssignShip(ship);
+                }
+                else
+                {
+                    playField[x][y + i].AssignShip(ship);
+                }
+            } 
+        }
+
+        private void AssignShip(Ship ship, int x, int y)
+        {
+            playField[x][y].AssignShip(ship);
+        }
+
+    }
+
+    class Square
+    {
+        public SquareType squareType { get; set; }
+        public Ship? ship { get; set; }
+
+        public Square(SquareType squareType, Ship ship)
+        {
+            this.squareType = squareType;
+            this.ship = ship;
+        }
+
+        public void AssignShip(Ship ship)
+        {
+            this.ship = ship;
+            this.squareType = SquareType.SHIP;
+        }
+    }
+}

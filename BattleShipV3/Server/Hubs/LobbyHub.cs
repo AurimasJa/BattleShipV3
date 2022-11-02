@@ -25,5 +25,17 @@ namespace BattleShipV3.Server.Hubs
         {
             await Clients.All.SendAsync("DeleteListing", lobby, user);
         }
+
+
+
+        public async Task UserLoggedIn(Models.User user)
+        {
+            await Clients.All.SendAsync("UserLoggedIn", user);
+        }
+
+        public async Task UserLoggedOff(Models.User user)
+        {
+            await Clients.All.SendAsync("UserLoggedOff", user);
+        }
     }
 }
