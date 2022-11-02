@@ -94,6 +94,7 @@ public class ShipsController : ControllerBase
         };
 
         await _shipsRepository.CreateUserSelectedShipAsync(userShips);
+
         return Created("", new UserSelectedShip
         {
             Id = userShips.Id,

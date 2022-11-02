@@ -45,10 +45,9 @@ public class ShipService
         return JsonConvert.DeserializeObject<Ship>(await json.Content.ReadAsStringAsync());
     }
 
-    public async Task<Ship> InsertUserSelectedShipAsync(CreateUserSelectedShipCommand createShipCommand)
+    public async Task InsertUserSelectedShipAsync(CreateUserSelectedShipCommand createShipCommand)
     {
-        var json = await _httpClient.PostAsync($"{baseUrl}/ships/userselected", RequestHelper.GetStringContentFromObject(createShipCommand));
-        return JsonConvert.DeserializeObject<Ship>(await json.Content.ReadAsStringAsync());
+        await _httpClient.PostAsync($"{baseUrl}/ships/userselected", RequestHelper.GetStringContentFromObject(createShipCommand));
     }
 
     public async Task<HttpResponseMessage> UpdateShipAsync(int shipId, UpdateShipCommand updateShipCommand)

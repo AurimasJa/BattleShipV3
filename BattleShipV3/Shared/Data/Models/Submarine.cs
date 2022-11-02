@@ -2,7 +2,7 @@
 {
     public class Submarine : Ship
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
         public int HiddenDuration { get; set; }
 
         public override int GetSpecialtyBonus()
