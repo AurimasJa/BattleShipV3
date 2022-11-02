@@ -7,6 +7,7 @@ using BattleShipV3.Shared.Data.Helpers;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using BattleShipV3.Shared.Data.Commands.UserShips.Create;
+using System.Text.Json;
 
 public class ShipService
 {
