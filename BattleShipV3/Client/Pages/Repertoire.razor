@@ -84,6 +84,8 @@
 
     string searchString { get; set; }
 
+
+
     protected override async Task OnInitializedAsync()
     {
         if(Global.CurrentUser is null)
@@ -93,8 +95,14 @@
         }
         ownedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id);
         selectedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id, true);
+
         await InvokeAsync(StateHasChanged);
         StateHasChanged();
+    }
+
+    protected bool IsSelectShipAllowed()
+    {
+        return selectedSelectedShip != null && selectedShips.Any(e => e.Length == selectedSelectedShip.Length);
     }
 
     protected async Task AddShip()

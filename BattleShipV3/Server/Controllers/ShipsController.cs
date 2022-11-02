@@ -9,6 +9,7 @@ using BattleShipV3.Shared.Data.Commands.Ship.Update;
 using static MudBlazor.CategoryTypes;
 using BattleShipV3.Models;
 using BattleShipV3.Shared.Data.Commands.UserShips.Create;
+using System.Text.Json;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -41,20 +42,14 @@ public class ShipsController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<Ship>> GetShipsAsync()
     {
-        var ships = await _shipsRepository.GetAllShipsAsync();
-        return ships.Select(x => new Ship { Id = x.Id, Name = x.Name, Length = x.Length, Missile = x.Missile });
+        return await _shipsRepository.GetAllShipsAsync();
     }
-    [HttpGet]
-    public async Task<IEnumerable<Ship>> GetAllUserShipsAsync(int userId)
+    [HttpGet("{userId}")]
+    public async Task<string> GetAllUserShipsAsync(int? userId, bool? selected)
     {
-        var ships = await _shipsRepository.GetAllOneUserShipsAsync(userId);
-        return ships.Select(x => new Ship
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Length = x.Length,
-            Missile = x.Missile
-        });
+        var ships = await _shipsRepository.GetAllOneUserShipsAsync(userId.Value, selected);
+        var json = Newtonsoft.Json.JsonConvert.SerializeObject(ships);
+        return json;
     }
 
     [HttpPost]
