@@ -7,7 +7,8 @@
 @if(Player != null && Player.User != null && Player.Ships != null && actualMap != null)
 {
     <MudItem>
-        <MudItem Style="display: inline-block; left:0px; position: relative">
+        <MudGrid Spacing="10" Justify="Justify.SpaceBetween">
+        <MudItem>
             <MudGrid Spacing="1">
                 @for(int i = 0; i < 10; i++)
                 {
@@ -34,7 +35,7 @@
             </MudGrid>
         </MudItem>
 
-        <MudItem Style="display: inline-block; right:0px; position: absolute">
+        <MudItem>
             <MudGrid Spacing="1">
                 @for(int i = 0; i< 10; i++)
                 {
@@ -49,16 +50,17 @@
                 }
             </MudGrid>
         </MudItem>
-
+        </MudGrid>
     </MudItem>
-
+    @*&& item.Id == selectedShip.Id*@
+    @*selectedShip != null*@
     @foreach (var item in Player.Ships)
     {
         <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => SelectShip(item)"
-            Disabled="selectedShip != null && item.Id == selectedShip.Id" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
+            Disabled="PlacedShips.Contains(item)" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
     }
 
-    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => Rotate(selectedShip)"
+    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
             Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
 }
 
@@ -101,14 +103,23 @@
         this.selectedShip = context;
     }
 
-    public void Rotate(Ship? context)
+    public bool IsRotated(Ship? context)
     {
-        this.selectedShip = context;
+        if (context.Rotation == ShipRotation.VERTICAL)
+        {
+            context.Rotation = ShipRotation.HORIZONTAL;
+            return true;
+        }
+        else if (context.Rotation == ShipRotation.HORIZONTAL)
+        {
+            context.Rotation = ShipRotation.VERTICAL;
+            return true;
+        }
+        return false;
     }
 
     public void PlaceShip(int x, int y)
     {
-        Console.WriteLine($"{x}:{y}");
         if (selectedShip is null)
             return;
 
@@ -118,10 +129,12 @@
         if (selectedShip.Rotation == ShipRotation.VERTICAL && selectedShip.Length + y > 10)
             return;
 
-        Console.WriteLine($"After checks");
-        actualMap.PlaceShip(selectedShip, x, y);
+        if (actualMap.IsShipPlaced(selectedShip, x, y))
+        {
+            PlacedShips.Add(selectedShip);
+            selectedShip = null;
+        }
         StateHasChanged();
-        Console.WriteLine($"Fin");
     }
 
     public string ColorEnumToHex(Ship context)
@@ -160,19 +173,45 @@
             }
         }
 
-        public void PlaceShip(Ship ship, int x, int y)
+        public bool IsShipPlaced(Ship ship, int x, int y)
+        {
+            if (IsAllowedToPlace(ship, x, y))
+            {
+                for (var i = 0; i < ship.Length; i++)
+                {
+                    if (ship.Rotation == ShipRotation.HORIZONTAL)
+                    {
+                        playField[x + i][y].AssignShip(ship);
+                    }
+                    else
+                    {
+                        playField[x][y + i].AssignShip(ship);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsAllowedToPlace(Ship ship, int x, int y)
         {
             for (var i = 0; i < ship.Length; i++)
             {
-                if(ship.Rotation == ShipRotation.HORIZONTAL)
-                {
-                    playField[x + i][y].AssignShip(ship);
+                if (ship.Rotation == ShipRotation.HORIZONTAL){
+                    if (playField[x + i][y].squareType == SquareType.SHIP)
+                    {
+                        return false;
+                    }
                 }
-                else
+                if (ship.Rotation == ShipRotation.VERTICAL)
                 {
-                    playField[x][y + i].AssignShip(ship);
+                    if (playField[x][y + i].squareType == SquareType.SHIP)
+                    {
+                        return false;
+                    } 
                 }
-            } 
+            }
+            return true;
         }
 
         private void AssignShip(Ship ship, int x, int y)
