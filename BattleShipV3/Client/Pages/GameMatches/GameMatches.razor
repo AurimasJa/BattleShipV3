@@ -43,7 +43,7 @@
         }
     }
 </svg>
-     <GameMatches Squares="@squares_Player" OnComplete="@(() => { is_setup = false;})"></GameMatches>
+     @*<GameMatches Squares="@squares_Player" OnComplete="@(() => { is_setup = false;})"></GameMatches>*@
 
 
 </div>
@@ -62,28 +62,26 @@
     public List<GridModels.Square> Squares { get; set; }
     [Parameter]
     public EventCallback OnComplete { get; set; }
-    [Parameter]
-    public List<GridModels.Square> Squares { get; set; }
 
-     public static Task<List<GridModels.Square>> GenerateSquares()
+    public static Task<List<GridModels.Square>> GenerateSquares()
+    {
+        var result = new List<GridModels.Square>();
+        int cur_x = 0;
+        int cur_y = 0;
+
+        for (int i = 0; i < 100; i++)
         {
-            var result = new List<GridModels.Square>();
-            int cur_x = 0;
-            int cur_y = 0;
-
-            for (int i = 0; i < 100; i++)
+            if (i % 10 == 0)
             {
-                if (i % 10 == 0)
-                {
-                    cur_x += 25;
-                    cur_y = 0;
+                cur_x += 25;
+                cur_y = 0;
 
-                }
-                result.Add(new GridModels.Square() { Id = Guid.NewGuid().ToString(), X = cur_x, Y = cur_y });
-                cur_y += 25;
             }
-            return Task.FromResult(result);
+            result.Add(new GridModels.Square() { Id = Guid.NewGuid().ToString(), X = cur_x, Y = cur_y });
+            cur_y += 25;
         }
+        return Task.FromResult(result);
+    }
     //bool is_setup = true;
     //int status = 1;
 
@@ -116,39 +114,40 @@
 
     async Task Add(GridModels.Square square)
     {
-        if(shiptype == 1 && !ship1_complete)
+        if (shiptype == 1 && !ship1_complete)
         {
-            if(await DataGenerator.AddShip(4, square , Squares))
+            if (await DataGenerator.AddShip(4, square, Squares))
             {
                 ship1_complete = true;
             }
         }
-        if(shiptype == 2 && !ship2_complete)
+        if (shiptype == 2 && !ship2_complete)
         {
-            if(await DataGenerator.AddShip(3, square , Squares))
+            if (await DataGenerator.AddShip(3, square, Squares))
             {
                 ship2_complete = true;
             }
         }
-        if(shiptype == 3 && !ship3_complete)
+        if (shiptype == 3 && !ship3_complete)
         {
-            if(await DataGenerator.AddShip(2, square , Squares))
+            if (await DataGenerator.AddShip(2, square, Squares))
             {
                 ship3_complete = true;
             }
         }
-        if(shiptype == 4 && !ship4_complete)
+        if (shiptype == 4 && !ship4_complete)
         {
-            if(await DataGenerator.AddShip(1, square , Squares))
+            if (await DataGenerator.AddShip(1, square, Squares))
             {
                 ship4_complete = true;
             }
         }
-        if(ship1_complete && ship2_complete && ship3_complete && ship4_complete)
+        if (ship1_complete && ship2_complete && ship3_complete && ship4_complete)
         {
             await OnComplete.InvokeAsync();
-        } 
-        protected override async Task OnInitializedAsync()
+        }
+    } 
+    protected override async Task OnInitializedAsync()
         {
             //squares_AI = await DataGenerator.GenerateSquares();
             Squares = await GenerateSquares();
