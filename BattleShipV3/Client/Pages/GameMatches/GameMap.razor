@@ -60,13 +60,13 @@
                                 @*//Ship hit*@
                                 @if(HitMap[x2][y2] == true)
                                 {
-                                    <MudPaper @onclick="() => OnClickGridPaper(x2,y2,true)" Style="background:#B71C1C"
+                                    <MudPaper Style="background:#B71C1C"
                                             Square="true" Height="25px" Width="25px"></MudPaper>
                                 }
                                 //Miss
                                 else if (HitMap[x2][y2] == false)
                                 {
-                                    <MudPaper @onclick="() => OnClickGridPaper(x2,y2,true)" Style="background:#37474F"
+                                    <MudPaper Style="background:#37474F"
                                             Square="true" Height="25px" Width="25px"></MudPaper>
                                 }
                                 //NONE
@@ -123,12 +123,7 @@
             </MudPaper>
         </MudItem>
     </MudGrid>
-}
-
-
     }
-   
-    
 }
 
 
@@ -181,6 +176,8 @@
         {
             FireMissile(x, y);
         }
+
+        StateHasChanged();
     }
 
     public void MissileLand(int x, int y)
@@ -198,6 +195,7 @@
 
     public void FireMissile(int x, int y)
     {
+        IsMyTurn = false;
         FireMissileEventArgs args = new FireMissileEventArgs();
         args.X = x;
         args.Y = y;

@@ -24,6 +24,10 @@ namespace BattleShipV3.Server.Hubs
 
         public async Task SendMissileLandResultAsync(int listingId, bool isHit, int userId)
         {
+            if(!isHit)
+            {
+                Console.WriteLine("w");
+            }
             await Clients.Group(listingId.ToString()).SendAsync("SendMissileLandResultAsync", isHit, userId);
         }
 
