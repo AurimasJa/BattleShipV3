@@ -45,8 +45,7 @@
 
 </MudTable>
 <br/>
-@*Filter="new Func<Ship,bool>(FilterFunc)"*@
-<MudTable Items="@ships" Hover="true" @bind-SelectedItem="selectedShip" @onclick="@BuyShip">
+<MudTable Items="@ships" Hover="true" Filter="new Func<Ship,bool>(FilterFunc)" @bind-SelectedItem="selectedShip" @onclick="@BuyShip">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Ships</MudText>
         <MudSpacer />
@@ -100,10 +99,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    //private bool FilterFunc(Ship element)
-    //{
-    //    if (ownedShips.Any(e => e.Id == element.Id))
-    //        return true;
-    //    return false;
-    //}
+    private bool FilterFunc(Ship element)
+    {
+        if (ownedShips.Any(e => e.Id == element.Id))
+            return false;
+        return true;
+    }
 }
