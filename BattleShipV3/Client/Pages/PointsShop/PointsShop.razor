@@ -4,6 +4,7 @@
 @using BattleShipV3.Shared.Data
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Client.Services
+@using BattleShipV3.Shared.Data.Commands.User.Update
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
 @using MudBlazor
 @using Models
@@ -12,6 +13,7 @@
 @inject NavigationManager Navigation
 @inject UserShipsService userShipsService
 @inject ShipService shipService
+@inject UserService userService
 
 <PageTitle>Points shop</PageTitle>
 
@@ -66,7 +68,7 @@
         <MudTh>@context.GetSpecialtyBonus()</MudTh>
         <MudTh>@context.Missile.MissileType</MudTh>
         <MudTh>@context.Missile.Cooldown</MudTh>
-        <MudTh>555</MudTh>
+        <MudTh>@GetCost(context)</MudTh>
     </RowTemplate>
 
 </MudTable>
@@ -90,11 +92,35 @@
         StateHasChanged();
     }
 
+    protected int GetCost(Ship ship)
+    {
+        var cost = 0;
+        switch(ship)
+        {
+            case Healer:
+                cost += 150;
+                break;
+            case Submarine:
+                cost += 200;
+                break;
+            default:
+                cost += 100;
+                break;
+        }
+
+        cost += 25 * (4 - ship.Length);
+
+        return cost;
+    }
+
     protected async Task BuyShip()
     {
         CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, selectedShip);
         await userShipsService.InsertUserShipsAsync(userShip);
         ownedShips.Add(selectedShip);
+
+        //UpdateUserCommand cmd = new UpdateUserCommand()
+        //await userService.UpdateUserAsync();
 
         await InvokeAsync(StateHasChanged);
     }
