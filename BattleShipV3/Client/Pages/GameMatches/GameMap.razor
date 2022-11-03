@@ -68,7 +68,7 @@
         <MudItem>
             <MudPaper Style="min-width:100px;max-width:400px;min-height:100px;">
                     <h3>DeepCopies</h3>
-                @foreach (var item in playSquaresDeep)
+                @foreach (var item in actualMap.playSquaresDeep)
                 {
                     @*, ActionTime: @item.squareActionTime*@
                     <p>Xcoord: @item.squareXcoor, Ycoord: @item.squareYcoor, ActionOnSquare: @item.squareAction</p>
@@ -80,7 +80,7 @@
         <MudItem>
             <MudPaper Style="min-width:100px;max-width:400px;min-height:100px;">
                     <h3>ShallowCopies</h3>
-                @foreach (var item in playSquaresShallow)
+                @foreach (var item in actualMap.playSquaresShallow)
                 {
                     @*, ActionTime: @item.squareActionTime*@
                     <p>Xcoord: @item.squareXcoor, Ycoord: @item.squareYcoor, ActionOnSquare: @item.squareAction</p>
@@ -101,8 +101,6 @@
     [Parameter] public GamePlayerModel Player { get; set; }
     //[Parameter] public BattleShipV3.Models.User User { get; set; }
     //[Parameter] public List< Player { get; set; }
-    [Parameter] public static List<PlaySquare> playSquaresDeep { get; set; } = new List<PlaySquare>();
-    [Parameter] public static List<PlaySquare> playSquaresShallow { get; set; } = new List<PlaySquare>();
 
 
     Ship selectedShip;
@@ -188,6 +186,9 @@
 
     class ActualMap
     {
+        
+        public List<PlaySquare> playSquaresDeep { get; set; } = new List<PlaySquare>();
+        public List<PlaySquare> playSquaresShallow { get; set; } = new List<PlaySquare>();
         //public Square[,] playField { get; set; }
         public List<Square[]> playField { get; set; }
         public PlaySquare oneplaySquare { get; set; }
