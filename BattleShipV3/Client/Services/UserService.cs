@@ -34,9 +34,9 @@ public class UserService
     {
         return await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(createUserCommand));
     }
-    public async Task<HttpResponseMessage> UpdateUserAsync(UpdateUserCommand updateUserCommand)
+    public async Task<HttpResponseMessage> UpdateUserAsync(int id,UpdateUserCommand updateUserCommand)
     {
-        return await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(updateUserCommand));
+        return await _httpClient.PutAsync($"{baseUrl}/users/{id}", RequestHelper.GetStringContentFromObject(updateUserCommand));
     }
     public async Task<HttpResponseMessage> DeleteUserAsync(int id)
     {

@@ -115,12 +115,22 @@
 
     protected async Task BuyShip()
     {
-        CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, selectedShip);
-        await userShipsService.InsertUserShipsAsync(userShip);
-        ownedShips.Add(selectedShip);
+        if (GetCost(selectedShip) <= Global.CurrentUser.Points)
+        {
+            CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, selectedShip);
+            await userShipsService.InsertUserShipsAsync(userShip);
+            ownedShips.Add(selectedShip); 
+            Global.CurrentUser.Points -= GetCost(selectedShip);
+            UpdateUserCommand cmd = new UpdateUserCommand(null, null, null, null, Global.CurrentUser.Points);
+            await userService.UpdateUserAsync(Global.CurrentUser.Id, cmd);
+            BattleShipV3.Models.User user = await userService.GetUserAsync(Global.CurrentUser.Email);
 
-        //UpdateUserCommand cmd = new UpdateUserCommand()
-        //await userService.UpdateUserAsync();
+            Global.CurrentUser = user;
+        }
+        else
+        {
+            await Console.Out.WriteLineAsync("Nepakankamai taškų");
+        }
 
         await InvokeAsync(StateHasChanged);
     }
