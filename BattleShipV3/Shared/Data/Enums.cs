@@ -21,5 +21,34 @@
         {
             Info, Success, Warning, Error
         }
+        public enum ShipColor
+        {
+            BLACK, BLUE, GREEN, YELLOW, PURPLE, WHITE, RED, ORANGE
+        }
+
+        public enum UserEvent
+        {
+            LOGIN, LOGOFF
+        }
+
+        public enum GamePhase
+        {
+            LAYOUT, ACTIVE, ENDED
+        }
+
+        public enum SquareType
+        {
+            SHIP, DESTROYED, NONE, MISSED
+        }
+
+        public enum ShipRotation
+        {
+            HORIZONTAL, VERTICAL   
+        }
+
+        public enum MissileLandEnum
+        {
+            HIT, MISS
+        }
     }
 }

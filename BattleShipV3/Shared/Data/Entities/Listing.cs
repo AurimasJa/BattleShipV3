@@ -2,6 +2,7 @@
 using BattleShipV3.Data.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using BattleShipV3.Shared.Data.Interfaces;
 
 namespace BattleShipV3.Models
 {
@@ -15,5 +16,10 @@ namespace BattleShipV3.Models
         public DateTime CreationDate { get; set; }
         public User PlayerOne { get; set; }
         public User? PlayerTwo { get; set; }
+        [NotMapped]
+        public string PlayerOneConnId { get; set; } = "";
+        [NotMapped]
+        public string PlayerTwoConnId { get; set; } = "";
+       
     }
 }

@@ -17,12 +17,18 @@ public class UserService
         _httpClient = httpClient;
         this.baseUrl = "https://localhost:5001";
     }
+    public async Task<BattleShipV3.Models.User> GetUserAsync(int id)
+    {
+        var user = await _httpClient.GetStringAsync($"{baseUrl}/users/{id}");
+        return JsonConvert.DeserializeObject<BattleShipV3.Models.User>(user);
+    }
 
     public async Task<BattleShipV3.Models.User> GetUserAsync(string email)
     {
         var user = await _httpClient.GetStringAsync($"{baseUrl}/users/email?email={email}");
         return JsonConvert.DeserializeObject<BattleShipV3.Models.User>(user);
     }
+
     public async Task<List<BattleShipV3.Models.User>> GetUsersAsync()
     {
         var user = await _httpClient.GetStringAsync($"{baseUrl}/users");

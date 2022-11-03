@@ -1,4 +1,5 @@
 using BattleShipV3.Client;
+using BattleShipV3.Client.DesignPatterns.Singleton;
 using BattleShipV3.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -18,5 +19,7 @@ builder.Services.AddScoped<ShipPlacementService>();
 builder.Services.AddScoped<MissileService>();
 builder.Services.AddScoped<UserShipsService>();
 builder.Services.AddMudServices();
+
+OnlinePlayersSingleton.getInstance();
 
 await builder.Build().RunAsync();

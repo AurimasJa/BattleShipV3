@@ -1,0 +1,432 @@
+﻿@using BattleShipV3.Client.DesignPatterns.Command
+@using BattleShipV3.Client.DesignPatterns.Prototype
+@using BattleShipV3.Data.Models
+@using BattleShipV3.Shared.Data.Models
+@using static BattleShipV3.Data.Enums
+
+<h2 style="text-align: center">@GetPhase()</h2>
+
+@if(Player != null && Player.User != null && Player.Ships != null && actualMap != null)
+{
+    <MudItem>
+        <MudGrid Spacing="10" Justify="Justify.SpaceBetween">
+        <MudItem>
+            <MudGrid Spacing="1">
+                @for(int i = 0; i < 10; i++)
+                {
+                    int x = i;
+                    <MudItem>
+                        @for(int j = 0; j < 10; j++)
+                            {
+                            int y = j;
+                            <MudItem Style="margin-bottom:5px">
+                                @if(actualMap.playField[x][y].squareType == SquareType.SHIP)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="@ColorEnumToHex(actualMap.playField[x][y].ship)"
+                                        Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                else if(actualMap.playField[x][y].squareType == SquareType.DESTROYED)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="background:#B71C1C"
+                                        Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                else if(actualMap.playField[x][y].squareType == SquareType.MISSED)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="background:#37474F"
+                                        Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                else
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                }
+                                
+                            </MudItem>
+                            }
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudItem>
+
+        <MudItem>
+            <MudGrid Spacing="1">
+                @for(int i = 0; i< 10; i++)
+                {
+                    int x2 = i;
+                    <MudItem >
+                        @for(int j = 0; j < 10; j++)
+                        {
+                            int y2 = j;
+                            <MudItem Style="margin-bottom:5px">
+                                @*//Ship hit*@
+                                @if(HitMap[x2][y2] == true)
+                                {
+                                    <MudPaper Style="background:#B71C1C"
+                                            Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                //Miss
+                                else if (HitMap[x2][y2] == false)
+                                {
+                                    <MudPaper Style="background:#37474F"
+                                            Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                //NONE
+                                else
+                                {
+                                    <MudItem Style="margin-bottom:5px">
+                                    <MudPaper @onclick="() => OnClickGridPaper(x2,y2, true)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                </MudItem>
+                                }
+                            </MudItem>
+                        }
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudItem>
+        </MudGrid>
+    </MudItem>
+    @*&& item.Id == selectedShip.Id*@
+    @*selectedShip != null*@
+    @if(gamePhase == GamePhase.LAYOUT)
+    {
+        @foreach (var item in Player.Ships)
+        {
+            <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => SelectShip(item)"
+                Disabled="PlacedShips.Contains(item)" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
+        }
+
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
+            Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
+
+    <MudGrid Spacing="2" Justify="Justify.SpaceBetween">
+        <MudItem>
+            <MudPaper Style="min-width:100px;max-width:400px;min-height:100px;">
+                    <h3>DeepCopies</h3>
+                @foreach (var item in actualMap.playSquaresDeep)
+                {
+                    @*, ActionTime: @item.squareActionTime*@
+                    <p>Xcoord: @item.squareXcoor, Ycoord: @item.squareYcoor, ActionOnSquare: @item.squareAction</p>
+                }
+                <p>----------------------------------------------</p>
+
+            </MudPaper>
+        </MudItem>
+        <MudItem>
+            <MudPaper Style="min-width:100px;max-width:400px;min-height:100px;">
+                    <h3>ShallowCopies</h3>
+                @foreach (var item in actualMap.playSquaresShallow)
+                {
+                    @*, ActionTime: @item.squareActionTime*@
+                    <p>Xcoord: @item.squareXcoor, Ycoord: @item.squareYcoor, ActionOnSquare: @item.squareAction</p>
+                }
+                <p>----------------------------------------------</p>
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    }
+}
+
+
+
+@code {
+
+
+    [Parameter] public GamePhase gamePhase { get; set; }
+    [Parameter] public GamePlayerModel Player { get; set; }
+    [Parameter] public EventCallback OnShipPhaseEnded { get; set; }
+    [Parameter] public EventCallback<FireMissileEventArgs> OnFireMissile { get; set; }
+    [Parameter] public EventCallback<MissileLandEventArgs> OnMissileLanded { get; set; }
+
+    List<bool?[]> HitMap;
+
+    //[Parameter] public BattleShipV3.Models.User User { get; set; }
+    //[Parameter] public List< Player { get; set; }
+
+
+    Ship selectedShip;
+
+    List<Ship> PlacedShips = new List<Ship>();
+
+    ActualMap actualMap;
+
+    bool? IsMyTurn { get; set; } = true;
+
+    int LastFireX = -1;
+    int LastFireY = -1;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        HitMap = new List<bool?[]>();
+        for(int i = 0; i < 10; i ++)
+        {
+            HitMap.Add(new bool?[10]);
+        }
+
+        actualMap = new ActualMap();
+    }
+
+    public void OnClickGridPaper(int x, int y, bool isShooting)
+    {
+        if(gamePhase == GamePhase.LAYOUT && !isShooting)
+        {
+            PlaceShip(x, y);
+        }
+        else if(gamePhase == GamePhase.ACTIVE && isShooting && IsMyTurn == true)
+        {
+            FireMissile(x, y);
+        }
+
+        StateHasChanged();
+    }
+
+    public void MissileLand(int x, int y)
+    {
+        bool isHit = this.actualMap.LandMissile(x, y);
+        MissileLandEventArgs e = new MissileLandEventArgs()
+            {
+                IsHit = isHit,
+                UserId = Player.User.Id
+            };
+        OnMissileLanded.InvokeAsync(e);
+        IsMyTurn = !isHit;
+        StateHasChanged();
+    }
+
+    public void FireMissile(int x, int y)
+    {
+        IsMyTurn = false;
+        FireMissileEventArgs args = new FireMissileEventArgs();
+        args.X = x;
+        args.Y = y;
+        args.UserId = Player.User.Id;
+
+        OnFireMissile.InvokeAsync(args);
+        LastFireX = x;
+        LastFireY = y;
+    }
+
+    public void AfterHit(bool isHit)
+    {
+        HitMap[LastFireX][LastFireY] = isHit;
+        IsMyTurn = isHit;
+        StateHasChanged();
+    }
+
+    public string GetPhase()
+    {
+        if (gamePhase == GamePhase.LAYOUT)
+            return "Ship placement Phase";
+        else
+            return "Game in progress";
+    }
+
+    public void RefreshUI()
+    {
+        StateHasChanged();
+    }
+
+    public void SelectShip(Ship context)
+    {
+        this.selectedShip = context;
+    }
+
+    public bool IsRotated(Ship? context)
+    {
+        if (context.Rotation == ShipRotation.VERTICAL)
+        {
+            context.Rotation = ShipRotation.HORIZONTAL;
+            return true;
+        }
+        else if (context.Rotation == ShipRotation.HORIZONTAL)
+        {
+            context.Rotation = ShipRotation.VERTICAL;
+            return true;
+        }
+        return false;
+    }
+
+    public void PlaceShip(int x, int y)
+    {
+        if (selectedShip is null)
+            return;
+
+        if (selectedShip.Rotation == ShipRotation.HORIZONTAL && selectedShip.Length + x > 10)
+            return;
+
+        if (selectedShip.Rotation == ShipRotation.VERTICAL && selectedShip.Length + y > 10)
+            return;
+
+        if (actualMap.IsShipPlaced(selectedShip, x, y))
+        {
+            PlacedShips.Add(selectedShip);
+            selectedShip = null;
+        }
+
+        StateHasChanged();
+
+        if (PlacedShips.Count >= 4)
+            OnShipPhaseEnded.InvokeAsync();
+    }
+
+    public string ColorEnumToHex(Ship context)
+    {
+        if(context.Color == ShipColor.WHITE)
+        {
+            return "background:#BDBDBD";
+        }
+        else if(context.Color == ShipColor.BLUE)
+        {
+            return "background:#1565C0";
+        }
+        else if(context.Color == ShipColor.GREEN)
+        {
+            return "background:#7CB342";
+        }
+        return "XD";
+    }
+
+    public class FireMissileEventArgs
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int UserId { get; set; }
+    }
+
+    public class MissileLandEventArgs
+    {
+        public bool IsHit { get; set; }
+        public int UserId { get; set; }
+    }
+
+    class ActualMap
+    {
+        
+        public List<PlaySquare> playSquaresDeep { get; set; } = new List<PlaySquare>();
+        public List<PlaySquare> playSquaresShallow { get; set; } = new List<PlaySquare>();
+        //public Square[,] playField { get; set; }
+        public List<Square[]> playField { get; set; }
+        public PlaySquare oneplaySquare { get; set; }
+
+        public ActualMap()
+        {
+            playField = new List<Square[]>();
+            for (var i = 0; i < 11; i++)
+            {
+                playField.Add(new Square[11]);
+
+                for (var j = 0; j < 11; j++)
+                {
+                    playField[i][j] = new Square(SquareType.NONE, null);
+                }
+            }
+        }
+
+        public bool LandMissile(int x, int y)
+        {
+            return playField[x][y].LandMissile();
+        }
+
+        public bool IsShipPlaced(Ship ship, int x, int y)
+        {
+            if (IsAllowedToPlace(ship, x, y))
+            {
+                for (var i = 0; i < ship.Length; i++)
+                {
+                    if (ship.Rotation == ShipRotation.HORIZONTAL)
+                    {
+                        playField[x + i][y].AssignShip(ship);
+                    }
+                    else
+                    {
+                        playField[x][y + i].AssignShip(ship);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public Square GetSquare(int x, int y)
+        {
+            return this.playField[x][y];
+        }
+
+        public bool IsAllowedToPlace(Ship ship, int x, int y)
+        {
+
+            //PlaySquare playSquare = new PlaySquare(0,0,"Nieko..");
+            for (var i = 0; i < ship.Length; i++)
+            {
+
+                if (ship.Rotation == ShipRotation.HORIZONTAL){
+                    if (playField[x + i][y].squareType == SquareType.SHIP)
+                    {
+                        //playSquare = new PlaySquare(x+i,y,"H - Negalimas");
+
+                        PrototypeCopies(x + i, y, "H - Negalimas");/*, 1, false*/
+                        return false;
+                    }
+                    //playSquare = new PlaySquare(x+i,y,"H - Galimas");
+                    
+                    PrototypeCopies(x + i, y, "H - Galimas");/*, 1, false*/
+                }
+                if (ship.Rotation == ShipRotation.VERTICAL)
+                {
+                    if (playField[x][y + i].squareType == SquareType.SHIP)
+                    {
+                        
+                        PrototypeCopies(x + i, y, "V - Negalimas");/*, 2, false*/
+                        return false;
+                    }
+                    //playSquare = new PlaySquare(x+i,y,"V - Galimas");
+                    PrototypeCopies(x + i, y, "V - Galimas");
+                }
+
+            }
+            return true;
+        }
+
+        private void AssignShip(Ship ship, int x, int y)
+        {
+            playField[x][y].AssignShip(ship);
+        }
+        private void PrototypeCopies(int x, int y, string actionName)/*,int rotation, bool possible*/
+        {
+            PlaySquare playSquare = new PlaySquare(x,y,actionName);
+            playSquaresDeep.Add(playSquare.DeepCopy());
+            playSquaresShallow.Add(playSquare.ShallowCopy());
+        }
+
+    }
+
+    public class Square
+    {
+        public SquareType squareType { get; set; }
+        public Ship? ship { get; set; }
+
+        public Square(SquareType squareType, Ship ship)
+        {
+            this.squareType = squareType;
+            this.ship = ship;
+        }
+
+        public void AssignShip(Ship ship)
+        {
+            this.ship = ship;
+            this.squareType = SquareType.SHIP;
+        }
+
+        public bool LandMissile()
+        {
+            if(squareType == SquareType.SHIP)
+            {
+                squareType = SquareType.DESTROYED;
+                return true;
+            }
+
+            squareType = SquareType.MISSED;
+            return false;
+        }
+    }
+}

@@ -3,6 +3,7 @@
 @using BattleShipV3.Models
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.Listing.Update
+@using BattleShipV3.Shared.Data.Interfaces
 @using Microsoft.AspNetCore.SignalR.Client
 
 <h3>@Listing?.Name</h3>
@@ -44,7 +45,7 @@
 
     @if(IsCreator())
     {
-        <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="@(Listing.PlayerOne == null || Listing.PlayerTwo == null)" @onclick="StartGame" Style="margin:5px">Start</MudButton>
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="@(Listing.PlayerOne == null || Listing.PlayerTwo == null)" @onclick="@(async () => await StartGame())" Style="margin:5px">Start</MudButton>
     }
 }
 
@@ -65,6 +66,7 @@
                    .WithAutomaticReconnect()
                    .Build();
 
+
         hubConnection.On<Listing, User>("JoinedListing", (lobby, user) =>
         {
             if(lobby.Id == ListingId)
@@ -83,14 +85,27 @@
             if(lobby.Id == ListingId)
             {
                 if (Listing.PlayerOne.Id == user.Id)
+                {
                     Listing.PlayerOne = Listing.PlayerTwo;
+                    Listing.PlayerOneConnId = Listing.PlayerTwoConnId;
+                }
                 Listing.PlayerTwo = null;
+                Listing.PlayerTwoConnId = "";
 
                 InvokeAsync(StateHasChanged);
             }
         });
 
+        hubConnection.On("MoveToGameMatch", () =>
+        {
+            string uri = Global.CurrentUser.Id == Listing.PlayerOne.Id ? $"/GameMatch/{Listing.Id}/{Listing.PlayerOne.Id}/{Listing.PlayerTwo.Id}"
+            : $"/GameMatch/{Listing.Id}/{Listing.PlayerTwo.Id}/{Listing.PlayerOne.Id}";
+            Navigation.NavigateTo(uri);
+            InvokeAsync(StateHasChanged);
+        });
         await hubConnection.StartAsync();
+
+        await hubConnection.SendAsync("JoinLobby", Listing.Id);
     }
 
 
@@ -157,8 +172,10 @@
         Navigation.NavigateTo("/listingslist");
     }
 
-    private void StartGame()
+    private async Task StartGame()
     {
+        Console.WriteLine("AA");
+        await hubConnection.SendAsync("MoveToGameMatch", Listing.Id);
         //TODO
     }
 

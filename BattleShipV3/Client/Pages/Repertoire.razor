@@ -1,4 +1,5 @@
 ﻿@page "/Repertoire"
+@using BattleShipV3.Client.DesignPatterns.Command
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared
@@ -44,7 +45,12 @@
 
 <hr />
 
-<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="selectedOwnedShip == null || selectedShips.Any(e => e.Length == selectedOwnedShip.Length) || selectedShips.Count >= 4" @onclick="AddShip" Style="margin:5px">Select</MudButton>
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="selectedOwnedShip == null || selectedShips.Any(e => e.Length == selectedOwnedShip.Length) || selectedShips.Count >= 4" 
+    @onclick="AddShip" Style="margin:5px">Select</MudButton>
+
+
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="!isShipAdded" 
+    @onclick="UndoSelectShip" Style="margin:5px">Undo</MudButton>
 
 <MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
     <ToolBarContent>
@@ -84,8 +90,13 @@
 
     string searchString { get; set; }
 
+    ICommand command;
+
+    bool isShipAdded { get; set; } = false;
+
     protected override async Task OnInitializedAsync()
     {
+        command = new SelectShipCommand(shipService, userShipService);
         if(Global.CurrentUser is null)
         {
             Navigation.NavigateTo("/login");
@@ -98,16 +109,25 @@
         StateHasChanged();
     }
 
+    protected async Task UndoSelectShip()
+    {
+        isShipAdded = false;
+        await command.Undo(Global.CurrentUser.Id, selectedOwnedShip.Id);
+        selectedShips.Remove(selectedSelectedShip);
+        ownedShips.Add(selectedSelectedShip);
+        await InvokeAsync(StateHasChanged);
+    }
 
     protected async Task AddShip()
     {
-        CreateUserSelectedShipCommand cmd = new CreateUserSelectedShipCommand(Global.CurrentUser.Id, selectedOwnedShip.Id);
-
-        await shipService.InsertUserSelectedShipAsync(cmd);
+        await command.Execute(Global.CurrentUser.Id, selectedOwnedShip.Id);
 
         ownedShips.Remove(selectedOwnedShip);
         selectedShips.Add(selectedOwnedShip);
 
+        selectedSelectedShip = selectedOwnedShip;
+
+        isShipAdded = true;
         await InvokeAsync(StateHasChanged);
     }
 
