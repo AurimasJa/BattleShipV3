@@ -133,6 +133,8 @@ public class UsersController : ControllerBase
             user.Name = updateUserCommand.Name is null ? user.Name : updateUserCommand.Name;
             user.Email = updateUserCommand.Email is null ? user.Email : updateUserCommand.Email;
             user.Password = updateUserCommand.Password is null ? user.Password : updateUserCommand.Password;
+            user.Elo = updateUserCommand.Elo is null ? user.Elo : updateUserCommand.Elo;
+            user.Points = updateUserCommand.Points is null ? user.Points : updateUserCommand.Points;
 
             await _usersRepository.UpdateUserAsync(user);
 
