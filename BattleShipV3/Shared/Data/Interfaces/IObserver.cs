@@ -8,6 +8,7 @@ namespace BattleShipV3.Shared.Data.Interfaces
 {
     public interface IObserver
     {
+        public string ConnectionId { get; set; }
         void Update(ISubject subject);
     }
 }

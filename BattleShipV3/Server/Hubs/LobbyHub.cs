@@ -11,6 +11,16 @@ namespace BattleShipV3.Server.Hubs
             await Clients.All.SendAsync("CreateListing", lobby, user);
         }
 
+        public async Task JoinLobby(int lobbyId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId.ToString());
+        }
+
+        public async Task MoveToGameMatch(int lobbyId)
+        {
+            await Clients.Group(lobbyId.ToString()).SendAsync("MoveToGameMatch");
+        }
+
         public async Task JoinedListing(Listing lobby, User user)
         {
             await Clients.All.SendAsync("JoinedListing", lobby, user);
@@ -26,7 +36,10 @@ namespace BattleShipV3.Server.Hubs
             await Clients.All.SendAsync("DeleteListing", lobby, user);
         }
 
-
+        public async Task GameStart(Listing lobby)
+        {
+            await Clients.All.SendAsync("DeleteListing", lobby);
+        }
 
         public async Task UserLoggedIn(Models.User user)
         {

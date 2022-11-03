@@ -1,8 +1,9 @@
-﻿@using BattleShipV3.Data.Models
+﻿@using BattleShipV3.Client.DesignPatterns.Command
+@using BattleShipV3.Data.Models
 @using BattleShipV3.Shared.Data.Models
 @using static BattleShipV3.Data.Enums
 
-<h3>Map</h3>
+<h2 style="text-align: center">@GetPhase()</h2>
 
 @if(Player != null && Player.User != null && Player.Ships != null && actualMap != null)
 {
@@ -23,6 +24,16 @@
                                     <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="@ColorEnumToHex(actualMap.playField[x][y].ship)"
                                         Square="true" Height="25px" Width="25px"></MudPaper>
                                 }
+                                else if(actualMap.playField[x][y].squareType == SquareType.DESTROYED)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="background:#B71C1C"
+                                        Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                else if(actualMap.playField[x][y].squareType == SquareType.MISSED)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Style="background:#37474F"
+                                        Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
                                 else
                                 {
                                     <MudPaper @onclick="() => OnClickGridPaper(x,y,false)" Square="true" Height="25px" Width="25px" ></MudPaper>
@@ -39,13 +50,33 @@
             <MudGrid Spacing="1">
                 @for(int i = 0; i< 10; i++)
                 {
+                    int x2 = i;
                     <MudItem >
                         @for(int j = 0; j < 10; j++)
-                            {
+                        {
+                            int y2 = j;
                             <MudItem Style="margin-bottom:5px">
-                                <MudPaper @onclick="() => OnClickGridPaper(i,j, true)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                @*//Ship hit*@
+                                @if(HitMap[x2][y2] == true)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x2,y2,true)" Style="background:#B71C1C"
+                                            Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                //Miss
+                                else if (HitMap[x2][y2] == false)
+                                {
+                                    <MudPaper @onclick="() => OnClickGridPaper(x2,y2,true)" Style="background:#37474F"
+                                            Square="true" Height="25px" Width="25px"></MudPaper>
+                                }
+                                //NONE
+                                else
+                                {
+                                    <MudItem Style="margin-bottom:5px">
+                                    <MudPaper @onclick="() => OnClickGridPaper(x2,y2, true)" Square="true" Height="25px" Width="25px" ></MudPaper>
+                                </MudItem>
+                                }
                             </MudItem>
-                            }
+                        }
                     </MudItem>
                 }
             </MudGrid>
@@ -54,14 +85,19 @@
     </MudItem>
     @*&& item.Id == selectedShip.Id*@
     @*selectedShip != null*@
-    @foreach (var item in Player.Ships)
+    @if(gamePhase == GamePhase.LAYOUT)
     {
-        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => SelectShip(item)"
-            Disabled="PlacedShips.Contains(item)" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
-    }
+        @foreach (var item in Player.Ships)
+        {
+            <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => SelectShip(item)"
+                Disabled="PlacedShips.Contains(item)" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
+        }
 
-    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
             Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
+    }
+   
+    
 }
 
 
@@ -70,6 +106,12 @@
 
     [Parameter] public GamePhase gamePhase { get; set; }
     [Parameter] public GamePlayerModel Player { get; set; }
+    [Parameter] public EventCallback OnShipPhaseEnded { get; set; }
+    [Parameter] public EventCallback<FireMissileEventArgs> OnFireMissile { get; set; }
+    [Parameter] public EventCallback<MissileLandEventArgs> OnMissileLanded { get; set; }
+
+    List<bool?[]> HitMap;
+
     //[Parameter] public BattleShipV3.Models.User User { get; set; }
     //[Parameter] public List< Player { get; set; }
 
@@ -79,10 +121,20 @@
 
     ActualMap actualMap;
 
-    public List<int> Ids = Enumerable.Range(0, 99).ToList();
+    bool? IsMyTurn { get; set; } = true;
+
+    int LastFireX = -1;
+    int LastFireY = -1;
 
     protected override async Task OnInitializedAsync()
     {
+
+        HitMap = new List<bool?[]>();
+        for(int i = 0; i < 10; i ++)
+        {
+            HitMap.Add(new bool?[10]);
+        }
+
         actualMap = new ActualMap();
     }
 
@@ -92,10 +144,55 @@
         {
             PlaceShip(x, y);
         }
-        else
+        else if(gamePhase == GamePhase.ACTIVE && isShooting && IsMyTurn == true)
         {
-            //TODO SHOOT MISSILE
+            FireMissile(x, y);
         }
+    }
+
+    public void MissileLand(int x, int y)
+    {
+        bool isHit = this.actualMap.LandMissile(x, y);
+        MissileLandEventArgs e = new MissileLandEventArgs()
+            {
+                IsHit = isHit,
+                UserId = Player.User.Id
+            };
+        OnMissileLanded.InvokeAsync(e);
+        IsMyTurn = !isHit;
+        StateHasChanged();
+    }
+
+    public void FireMissile(int x, int y)
+    {
+        FireMissileEventArgs args = new FireMissileEventArgs();
+        args.X = x;
+        args.Y = y;
+        args.UserId = Player.User.Id;
+
+        OnFireMissile.InvokeAsync(args);
+        LastFireX = x;
+        LastFireY = y;
+    }
+
+    public void AfterHit(bool isHit)
+    {
+        HitMap[LastFireX][LastFireY] = isHit;
+        IsMyTurn = isHit;
+        StateHasChanged();
+    }
+
+    public string GetPhase()
+    {
+        if (gamePhase == GamePhase.LAYOUT)
+            return "Ship placement Phase";
+        else
+            return "Game in progress";
+    }
+
+    public void RefreshUI()
+    {
+        StateHasChanged();
     }
 
     public void SelectShip(Ship context)
@@ -134,7 +231,11 @@
             PlacedShips.Add(selectedShip);
             selectedShip = null;
         }
+
         StateHasChanged();
+
+        if (PlacedShips.Count >= 4)
+            OnShipPhaseEnded.InvokeAsync();
     }
 
     public string ColorEnumToHex(Ship context)
@@ -152,6 +253,19 @@
             return "background:#7CB342";
         }
         return "XD";
+    }
+
+    public class FireMissileEventArgs
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int UserId { get; set; }
+    }
+
+    public class MissileLandEventArgs
+    {
+        public bool IsHit { get; set; }
+        public int UserId { get; set; }
     }
 
     class ActualMap
@@ -173,6 +287,11 @@
             }
         }
 
+        public bool LandMissile(int x, int y)
+        {
+            return playField[x][y].LandMissile();
+        }
+
         public bool IsShipPlaced(Ship ship, int x, int y)
         {
             if (IsAllowedToPlace(ship, x, y))
@@ -191,6 +310,11 @@
                 return true;
             }
             return false;
+        }
+
+        public Square GetSquare(int x, int y)
+        {
+            return this.playField[x][y];
         }
 
         public bool IsAllowedToPlace(Ship ship, int x, int y)
@@ -218,10 +342,9 @@
         {
             playField[x][y].AssignShip(ship);
         }
-
     }
 
-    class Square
+    public class Square
     {
         public SquareType squareType { get; set; }
         public Ship? ship { get; set; }
@@ -236,6 +359,18 @@
         {
             this.ship = ship;
             this.squareType = SquareType.SHIP;
+        }
+
+        public bool LandMissile()
+        {
+            if(squareType == SquareType.SHIP)
+            {
+                squareType = SquareType.DESTROYED;
+                return true;
+            }
+
+            squareType = SquareType.MISSED;
+            return false;
         }
     }
 }

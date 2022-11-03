@@ -45,5 +45,10 @@
         {
             HORIZONTAL, VERTICAL   
         }
+
+        public enum MissileLandEnum
+        {
+            HIT, MISS
+        }
     }
 }

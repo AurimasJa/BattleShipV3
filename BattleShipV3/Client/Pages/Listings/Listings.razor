@@ -16,8 +16,6 @@
 
 
 @implements IAsyncDisposable
-@implements IObserver
-
 
 <MudText>
     Online users: @OnlinePlayersSingleton.OnlineUsers.Count
@@ -84,6 +82,7 @@
     </div>
 </div>
 
+
 @code {
     private HubConnection? hubConnection;
     private string searchString = "";
@@ -106,6 +105,7 @@
             .WithUrl(Navigation.ToAbsoluteUri("/lobbyhub"))
             .WithAutomaticReconnect()
             .Build();
+
 
         hubConnection.On<Listing, Models.User>("CreateListing", (lobby, user) =>
         {

@@ -16,5 +16,10 @@ namespace BattleShipV3.Models
         public DateTime CreationDate { get; set; }
         public User PlayerOne { get; set; }
         public User? PlayerTwo { get; set; }
+        [NotMapped]
+        public string PlayerOneConnId { get; set; } = "";
+        [NotMapped]
+        public string PlayerTwoConnId { get; set; } = "";
+       
     }
 }
