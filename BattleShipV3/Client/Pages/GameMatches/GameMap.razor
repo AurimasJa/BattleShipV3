@@ -1,4 +1,5 @@
 ﻿@using BattleShipV3.Client.DesignPatterns.Command
+@using BattleShipV3.Client.DesignPatterns.Prototype
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared.Data.Models
 @using static BattleShipV3.Data.Enums
@@ -95,6 +96,36 @@
 
         <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
             Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
+
+    <MudGrid Spacing="2" Justify="Justify.SpaceBetween">
+        <MudItem>
+            <MudPaper Style="min-width:100px;max-width:400px;min-height:100px;">
+                    <h3>DeepCopies</h3>
+                @foreach (var item in actualMap.playSquaresDeep)
+                {
+                    @*, ActionTime: @item.squareActionTime*@
+                    <p>Xcoord: @item.squareXcoor, Ycoord: @item.squareYcoor, ActionOnSquare: @item.squareAction</p>
+                }
+                <p>----------------------------------------------</p>
+
+            </MudPaper>
+        </MudItem>
+        <MudItem>
+            <MudPaper Style="min-width:100px;max-width:400px;min-height:100px;">
+                    <h3>ShallowCopies</h3>
+                @foreach (var item in actualMap.playSquaresShallow)
+                {
+                    @*, ActionTime: @item.squareActionTime*@
+                    <p>Xcoord: @item.squareXcoor, Ycoord: @item.squareYcoor, ActionOnSquare: @item.squareAction</p>
+                }
+                <p>----------------------------------------------</p>
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+
     }
    
     
@@ -103,6 +134,7 @@
 
 
 @code {
+
 
     [Parameter] public GamePhase gamePhase { get; set; }
     [Parameter] public GamePlayerModel Player { get; set; }
@@ -114,6 +146,7 @@
 
     //[Parameter] public BattleShipV3.Models.User User { get; set; }
     //[Parameter] public List< Player { get; set; }
+
 
     Ship selectedShip;
 
@@ -270,8 +303,12 @@
 
     class ActualMap
     {
+        
+        public List<PlaySquare> playSquaresDeep { get; set; } = new List<PlaySquare>();
+        public List<PlaySquare> playSquaresShallow { get; set; } = new List<PlaySquare>();
         //public Square[,] playField { get; set; }
         public List<Square[]> playField { get; set; }
+        public PlaySquare oneplaySquare { get; set; }
 
         public ActualMap()
         {
@@ -319,21 +356,35 @@
 
         public bool IsAllowedToPlace(Ship ship, int x, int y)
         {
+
+            //PlaySquare playSquare = new PlaySquare(0,0,"Nieko..");
             for (var i = 0; i < ship.Length; i++)
             {
+
                 if (ship.Rotation == ShipRotation.HORIZONTAL){
                     if (playField[x + i][y].squareType == SquareType.SHIP)
                     {
+                        //playSquare = new PlaySquare(x+i,y,"H - Negalimas");
+
+                        PrototypeCopies(x + i, y, "H - Negalimas");/*, 1, false*/
                         return false;
                     }
+                    //playSquare = new PlaySquare(x+i,y,"H - Galimas");
+                    
+                    PrototypeCopies(x + i, y, "H - Galimas");/*, 1, false*/
                 }
                 if (ship.Rotation == ShipRotation.VERTICAL)
                 {
                     if (playField[x][y + i].squareType == SquareType.SHIP)
                     {
+                        
+                        PrototypeCopies(x + i, y, "V - Negalimas");/*, 2, false*/
                         return false;
-                    } 
+                    }
+                    //playSquare = new PlaySquare(x+i,y,"V - Galimas");
+                    PrototypeCopies(x + i, y, "V - Galimas");
                 }
+
             }
             return true;
         }
@@ -342,6 +393,13 @@
         {
             playField[x][y].AssignShip(ship);
         }
+        private void PrototypeCopies(int x, int y, string actionName)/*,int rotation, bool possible*/
+        {
+            PlaySquare playSquare = new PlaySquare(x,y,actionName);
+            playSquaresDeep.Add(playSquare.DeepCopy());
+            playSquaresShallow.Add(playSquare.ShallowCopy());
+        }
+
     }
 
     public class Square
