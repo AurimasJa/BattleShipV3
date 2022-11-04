@@ -18,7 +18,7 @@
 @implements IAsyncDisposable
 
 <MudText>
-    Online users: @OnlinePlayersSingleton.OnlineUsers.Count
+    Online users: @onlineUsers
 </MudText>
 
 @if(Global.CurrentUser != null)
@@ -96,6 +96,8 @@
     double eloFrom, eloTo;
     string lobbyName;
 
+    int onlineUsers { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         if (Global.CurrentUser == null)
@@ -136,16 +138,25 @@
             InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<User>("UserLoggedIn", (user) =>
+        hubConnection.On<User, int>("UserLoggedIn", (user, userCount) =>
         {
-            OnlinePlayersSingleton.OnlineUsers.Add(user);
-            Console.WriteLine(OnlinePlayersSingleton.OnlineUsers.Count);
+            //OnlinePlayersSingleton.OnlineUsers.Add(user);
+            onlineUsers = userCount;
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<int>("fetchusercount", (userCount) =>
+        {
+            //OnlinePlayersSingleton.OnlineUsers.Add(user);
+            onlineUsers = userCount;
             InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
 
         await Load();
+
+        await hubConnection.SendAsync("FetchUserCount");
 
         await InvokeAsync(StateHasChanged);
         StateHasChanged();

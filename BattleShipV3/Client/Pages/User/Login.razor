@@ -75,7 +75,7 @@
             //TOAST NEVEIKIA
             await Task.Run(() => toastService.ShowToast("Created", Data.Enums.ToastLevel.Success));
             await toastService.ShowToastAsync("Created", Data.Enums.ToastLevel.Success);
-            OnlinePlayersSingleton.OnlineUsers.Add(user);
+            //OnlinePlayersSingleton.OnlineUsers.Add(user);
             
             await hubConnection.SendAsync("UserLoggedIn", user);
 

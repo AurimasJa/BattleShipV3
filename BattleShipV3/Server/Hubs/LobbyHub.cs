@@ -1,4 +1,5 @@
-﻿using BattleShipV3.Models;
+﻿using BattleShipV3.Client.DesignPatterns.Singleton;
+using BattleShipV3.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BattleShipV3.Server.Hubs
@@ -41,9 +42,15 @@ namespace BattleShipV3.Server.Hubs
             await Clients.All.SendAsync("DeleteListing", lobby);
         }
 
-        public async Task UserLoggedIn(Models.User user)
+        public async Task FetchUserCount()
         {
-            await Clients.All.SendAsync("UserLoggedIn", user);
+            await Clients.Client(Context.ConnectionId).SendAsync("fetchusercount", OnlinePlayersSingleton.OnlineUsers.Count);
+        }
+
+    public async Task UserLoggedIn(Models.User user)
+        {
+            OnlinePlayersSingleton.OnlineUsers.Add(user);
+            await Clients.All.SendAsync("UserLoggedIn", user, OnlinePlayersSingleton.OnlineUsers.Count);
         }
 
         public async Task UserLoggedOff(Models.User user)

@@ -2,6 +2,7 @@
 using BattleShipV3.Server.Hubs;
 using BattleShipV3.Server.Repositories;
 using BattleShipV3;
+using BattleShipV3.Client.DesignPatterns.Singleton;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,5 +67,7 @@ app.MapHub<ChatHub>("/chathub");
 app.MapHub<LobbyHub>("/lobbyhub");
 app.MapHub<GameHub>("/gamehub");
 app.MapFallbackToFile("index.html");
+
+OnlinePlayersSingleton.getInstance();
 
 app.Run();
