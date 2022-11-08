@@ -9,7 +9,16 @@ namespace BattleShipV3.Server.Hubs
     {
         public async Task CreateListing(Listing lobby, Models.User user)
         {
+            OnlinePlayersSingleton.LiveListings.TryAdd(lobby.Id, lobby);
             await Clients.All.SendAsync("CreateListing", lobby, user);
+        }
+
+        public async Task AlertObservers(Listing listing, List<string> connectionStrings)
+        {
+            foreach (var item in connectionStrings)
+            {
+                await Clients.Client(item).SendAsync("Observation", listing);
+            }
         }
 
         public async Task JoinLobby(int lobbyId)
@@ -19,6 +28,7 @@ namespace BattleShipV3.Server.Hubs
 
         public async Task MoveToGameMatch(int lobbyId)
         {
+            RemoveListingFromSingleton(lobbyId);
             await Clients.Group(lobbyId.ToString()).SendAsync("MoveToGameMatch");
         }
 
@@ -34,12 +44,20 @@ namespace BattleShipV3.Server.Hubs
 
         public async Task DeleteListing(Listing lobby, User user)
         {
+            RemoveListingFromSingleton(lobby.Id);
             await Clients.All.SendAsync("DeleteListing", lobby, user);
         }
 
         public async Task GameStart(Listing lobby)
         {
+            RemoveListingFromSingleton(lobby.Id);
             await Clients.All.SendAsync("DeleteListing", lobby);
+        }
+
+        private void RemoveListingFromSingleton(int listingId)
+        {
+            Listing outL = new Listing(); ;
+            OnlinePlayersSingleton.LiveListings.Remove(listingId, out outL);
         }
 
         public async Task FetchUserCount()
@@ -47,7 +65,12 @@ namespace BattleShipV3.Server.Hubs
             await Clients.Client(Context.ConnectionId).SendAsync("fetchusercount", OnlinePlayersSingleton.OnlineUsers.Count);
         }
 
-    public async Task UserLoggedIn(Models.User user)
+        public async Task AttachObserver(string connectionString)
+        {
+
+        }
+
+        public async Task UserLoggedIn(Models.User user)
         {
             OnlinePlayersSingleton.OnlineUsers.Add(user);
             await Clients.All.SendAsync("UserLoggedIn", user, OnlinePlayersSingleton.OnlineUsers.Count);

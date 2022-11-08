@@ -1,14 +1,17 @@
 ﻿@page "/pointsshop"
 
+@using BattleShipV3.Client.DesignPatterns.Factory
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Shared.Data.Commands.User.Update
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
+@using BattleShipV3.Shared.Data.Interfacess
 @using MudBlazor
 @using Models
 @using Data
+@using static BattleShipV3.Data.Enums
 
 @inject NavigationManager Navigation
 @inject UserShipsService userShipsService
@@ -70,13 +73,20 @@
         <MudTh>@context.Missile.Cooldown</MudTh>
         <MudTh>@GetCost(context)</MudTh>
     </RowTemplate>
-
 </MudTable>
+
+<MudText>Purchase with:</MudText>
+<MudButton Color="Color.Secondary" Disabled="@(purchaseType == PurchaseType.POINTS)" Variant="Variant.Filled" @onclick="() => SetPurchaseType(PurchaseType.POINTS)" Style="margin:5px">Points</MudButton>
+<MudButton Color="Color.Secondary" Disabled="@(purchaseType == PurchaseType.CASH)" Variant="Variant.Filled" @onclick="() => SetPurchaseType(PurchaseType.CASH)" Style="margin:5px">Cash</MudButton>
+<MudButton Color="Color.Secondary" Disabled="@(purchaseType == PurchaseType.TICKET)" Variant="Variant.Filled" @onclick="() => SetPurchaseType(PurchaseType.TICKET)" Style="margin:5px">Tickets</MudButton>
+
 
 @code {
     List<Ship> ownedShips { get; set; }
     List<Ship> ships { get; set; }
     Ship selectedShip { get; set; }
+
+    PurchaseType? purchaseType { get; set; } = PurchaseType.POINTS;
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,47 +102,88 @@
         StateHasChanged();
     }
 
-    protected int GetCost(Ship ship)
+    public void SetPurchaseType(PurchaseType type)
     {
-        var cost = 0;
-        switch(ship)
+        this.purchaseType = type;
+        StateHasChanged();
+    }
+
+    protected string GetCost(Ship ship)
+    {
+        IPurchase purchase;
+        if (ship is null)
+            return "";
+
+        switch (purchaseType)
         {
-            case Healer:
-                cost += 150;
+            case PurchaseType.TICKET:
+                purchase = CreatePurchase(new TicketPurchaseFactory(), ship);
                 break;
-            case Submarine:
-                cost += 200;
+            case PurchaseType.CASH:
+                purchase = CreatePurchase(new CashPurchaseFactory(), ship);
                 break;
             default:
-                cost += 100;
+                purchase = CreatePurchase(new PointsPurchaseFactory(), ship);
                 break;
+
         }
+        if (purchaseType == PurchaseType.CASH)
+            return "$" + purchase.Cost;
 
-        cost += 25 * (4 - ship.Length);
-
-        return cost;
+        return purchase.Cost.ToString();
     }
 
     protected async Task BuyShip()
     {
-        if (GetCost(selectedShip) <= Global.CurrentUser.Points)
+        IPurchase purchase;
+
+        switch(purchaseType)
+        {
+            case PurchaseType.TICKET:
+                purchase = CreatePurchase(new TicketPurchaseFactory(), selectedShip);
+                break;
+            case PurchaseType.CASH:
+                purchase = CreatePurchase(new CashPurchaseFactory(), selectedShip);
+                break;
+            default:
+                purchase = CreatePurchase(new PointsPurchaseFactory(), selectedShip);
+                break;
+        }
+
+
+        if (((purchase.Cost <= Global.CurrentUser.Points) || (purchaseType == PurchaseType.CASH)) && (purchaseType != PurchaseType.TICKET))
         {
             CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser, selectedShip);
             await userShipsService.InsertUserShipsAsync(userShip);
-            ownedShips.Add(selectedShip); 
-            Global.CurrentUser.Points -= GetCost(selectedShip);
-            UpdateUserCommand cmd = new UpdateUserCommand(null, null, null, null, Global.CurrentUser.Points);
-            await userService.UpdateUserAsync(Global.CurrentUser.Id, cmd);
-            BattleShipV3.Models.User user = await userService.GetUserAsync(Global.CurrentUser.Email);
+            ownedShips.Add(selectedShip);
+            if(purchaseType == PurchaseType.POINTS)
+            {
+                Global.CurrentUser.Points -= (int)purchase.Cost;
+                UpdateUserCommand cmd = new UpdateUserCommand(null, null, null, null, Global.CurrentUser.Points);
+                await userService.UpdateUserAsync(Global.CurrentUser.Id, cmd);
+            }
+            else if(purchaseType == PurchaseType.CASH)
+            {
+                //TODO CASH
+            }
+            else
+            {
+                //TODO TICKETS
+            }
 
-            Global.CurrentUser = user;
         }
         else
         {
-            await Console.Out.WriteLineAsync("Nepakankamai taškų");
+            await Console.Out.WriteLineAsync("DAR 1 LIETUVISKAS ZODIS MANO PROGRAMOJ"); 
         }
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected IPurchase CreatePurchase(Factory factory, Ship ship)
+    {
+        IPurchase purchase = factory.GetCreatedPurchase(ship);
+        return purchase;
     }
 
     private bool FilterFunc(Ship element)

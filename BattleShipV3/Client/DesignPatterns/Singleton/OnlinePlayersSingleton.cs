@@ -7,10 +7,12 @@ namespace BattleShipV3.Client.DesignPatterns.Singleton
     {
         private static OnlinePlayersSingleton instance = null;
         public static BlockingCollection<User> OnlineUsers { get; set; }
+        public static ConcurrentDictionary<int, Listing> LiveListings { get; set; }
 
         private OnlinePlayersSingleton()
         {
             OnlineUsers = new BlockingCollection<User>();
+            LiveListings = new ConcurrentDictionary<int, Listing>();
         }
 
         public static OnlinePlayersSingleton getInstance()

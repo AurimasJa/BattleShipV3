@@ -1,5 +1,4 @@
 ﻿using BattleShipV3.Data.Models;
-using BattleShipV3.Shared.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

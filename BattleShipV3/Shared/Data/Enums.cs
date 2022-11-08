@@ -50,5 +50,10 @@
         {
             HIT, MISS
         }
+
+        public enum PurchaseType
+        {
+            TICKET, POINTS, CASH
+        }
     }
 }

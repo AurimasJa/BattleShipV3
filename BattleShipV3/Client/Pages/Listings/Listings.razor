@@ -1,10 +1,11 @@
 ﻿@page "/listingslist"
 
+@using BattleShipV3.Client.DesignPatterns.Observer
 @using BattleShipV3.Client.DesignPatterns.Singleton
+@using BattleShipV3.Client.DesignPatterns.Strategy
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.Listing.Create
 @using BattleShipV3.Shared.Data.Commands.Listing.Update
-@using BattleShipV3.Shared.Data.Interfaces
 @using Microsoft.AspNetCore.SignalR.Client
 @using MudBlazor
 @using Models
@@ -20,6 +21,13 @@
 <MudText>
     Online users: @onlineUsers
 </MudText>
+
+<MudSelect T="string" Label="Filter strategy" AnchorOrigin="Origin.BottomCenter" ValueChanged="value => SetStrategy(value)" >
+    <MudSelectItem Value="@("By Lobby Name")" />
+    <MudSelectItem Value="@("By Creator")" />
+    <MudSelectItem Value="@("Max Elo Less Than")" />
+    <MudSelectItem Value="@("Max Elo More Than")" />
+</MudSelect>
 
 @if(Global.CurrentUser != null)
 {
@@ -98,6 +106,8 @@
 
     int onlineUsers { get; set; }
 
+    IFilterStrategy filterStrategy { get;set; }
+
     protected override async Task OnInitializedAsync()
     {
         if (Global.CurrentUser == null)
@@ -140,19 +150,21 @@
 
         hubConnection.On<User, int>("UserLoggedIn", (user, userCount) =>
         {
-            //OnlinePlayersSingleton.OnlineUsers.Add(user);
-            onlineUsers = userCount;
+        //OnlinePlayersSingleton.OnlineUsers.Add(user);
+        onlineUsers = userCount;
             InvokeAsync(StateHasChanged);
         });
 
         hubConnection.On<int>("fetchusercount", (userCount) =>
         {
-            //OnlinePlayersSingleton.OnlineUsers.Add(user);
-            onlineUsers = userCount;
+        //OnlinePlayersSingleton.OnlineUsers.Add(user);
+        onlineUsers = userCount;
             InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
+
+        SetStrategy("By Name");
 
         await Load();
 
@@ -217,13 +229,21 @@
 
     private bool FilterFunc(Listing element, string searchString)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if ($"{element.PlayerOne.Name}".Contains(searchString))
-            return true;
-        return false;
+        Console.WriteLine(filterStrategy);
+        return filterStrategy.FilterFunction(element, searchString);
+    }
+
+    public void SetStrategy(string strategy)
+    {
+        if(strategy.Equals("By Creator"))
+            this.filterStrategy = new FilterStrategyByCreator();
+        else if(strategy.Equals("By Lobby Name"))
+            this.filterStrategy = new FilterStrategyByName();
+        else if(strategy.Equals("Max Elo Less Than"))
+            this.filterStrategy = new FilterStrategyByLessMaxElo();
+        else
+            this.filterStrategy = new FilterStrategyByMoreMaxElo();
+
     }
 
     public async ValueTask DisposeAsync()
@@ -233,10 +253,4 @@
             await hubConnection.DisposeAsync();
         }
     }
-
-    public void Update(ISubject subject)
-    {
-        Console.WriteLine("ConcreteObserverA: Reacted to the event.");
-    }
-
 }

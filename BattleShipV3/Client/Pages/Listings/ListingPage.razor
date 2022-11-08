@@ -3,7 +3,7 @@
 @using BattleShipV3.Models
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.Listing.Update
-@using BattleShipV3.Shared.Data.Interfaces
+@*@using BattleShipV3.Shared.Data.Interfaces*@
 @using Microsoft.AspNetCore.SignalR.Client
 
 <h3>@Listing?.Name</h3>
@@ -148,6 +148,11 @@
             ret++;
 
         return ret;
+    }
+
+    private async Task NotifySubscribers()
+    {
+        await hubConnection.SendAsync("");
     }
 
     private async Task LeaveLobby()
