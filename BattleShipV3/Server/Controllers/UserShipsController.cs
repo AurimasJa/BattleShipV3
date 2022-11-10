@@ -56,7 +56,7 @@ namespace BattleShipV3.Server.Controllers
             }
 
             var user = await _usersRepository.GetUserAsync(createUserShipsCommand.UserId);
-            var ship = await _shipsRepository.GetShipAsync(createUserShipsCommand.Ship.Id);
+            var ship = await _shipsRepository.GetShipAsync(createUserShipsCommand.ShipId);
 
             var userShips = new UserShip
             {

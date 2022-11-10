@@ -40,7 +40,7 @@ namespace BattleShipV3.Client.DesignPatterns.Facade
         {
             if (((purchase.Cost <= Global.CurrentUser.Points) || (purchaseType == PurchaseType.CASH)) && (purchaseType != PurchaseType.TICKET))
             {
-                CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser.Id, selectedShip);
+                CreateUserShipsCommand userShip = new CreateUserShipsCommand(Global.CurrentUser.Id, selectedShip.Id);
                 await userShipsService.InsertUserShipsAsync(userShip);
                 ownedShips.Add(selectedShip);
                 if (purchaseType == PurchaseType.POINTS)
