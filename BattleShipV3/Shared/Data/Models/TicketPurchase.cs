@@ -13,7 +13,7 @@ namespace BattleShipV3.Shared.Data.Models
         public double Cost { get; set; }
         public double Discount { get; set; }
         public Ship Ship { get; set; }
-        public override double CalculateTotalPrice()
+        public double CalculateTotalPrice()
         {
             return 1;
         }

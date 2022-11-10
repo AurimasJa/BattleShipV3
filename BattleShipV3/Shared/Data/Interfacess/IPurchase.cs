@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Data.Interfacess
 {
-    public abstract class IPurchase
+    public interface IPurchase
     {
         public double Cost { get; set; }
         public double Discount { get; set; }
         Ship Ship { get; set; }
-        public abstract double CalculateTotalPrice();
+        public double CalculateTotalPrice();
     }
 }
