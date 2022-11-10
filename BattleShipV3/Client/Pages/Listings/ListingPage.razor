@@ -150,11 +150,6 @@
         return ret;
     }
 
-    private async Task NotifySubscribers()
-    {
-        await hubConnection.SendAsync("");
-    }
-
     private async Task LeaveLobby()
     {
         if (hubConnection is null)

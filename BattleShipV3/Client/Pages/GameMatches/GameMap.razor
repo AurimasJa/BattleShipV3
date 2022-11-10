@@ -1,4 +1,6 @@
-﻿@using BattleShipV3.Client.DesignPatterns.Command
+﻿@using BattleShipV3.Client.DesignPatterns
+@using BattleShipV3.Client.DesignPatterns.Bridge
+@using BattleShipV3.Client.DesignPatterns.Command
 @using BattleShipV3.Client.DesignPatterns.Prototype
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared.Data.Models
@@ -96,6 +98,14 @@
 
         <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
             Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
+
+        <br />
+
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => ChangeShipColor(selectedShip, ShipColor.ORANGE)"
+            Disabled="selectedShip == null" Style="margin:5px">Change Ship Color (Orange)</MudButton>
+
+            <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => ChangeShipColor(selectedShip, ShipColor.PURPLE)"
+            Disabled="selectedShip == null" Style="margin:5px">Change Ship Color (Purple)</MudButton>
 
     <MudGrid Spacing="2" Justify="Justify.SpaceBetween">
         <MudItem>
@@ -231,6 +241,26 @@
         this.selectedShip = context;
     }
 
+    public void ChangeShipColor(Ship selectedShip, ShipColor color)
+    {
+        selectedShip.ColorChanger = GetColorChanger(color);
+        if(selectedShip.ColorChanger != null)
+            selectedShip.ChangeColor();
+    }
+
+    public IColorChanger GetColorChanger(ShipColor color)
+    {
+        switch(color)
+        {
+            case ShipColor.PURPLE:
+                return new ColorChangerPurple();
+            case ShipColor.ORANGE:
+                return new ColorChangerOrange();
+        }
+
+        return null;
+    }
+
     public bool IsRotated(Ship? context)
     {
         if (context.Rotation == ShipRotation.VERTICAL)
@@ -282,6 +312,14 @@
         else if(context.Color == ShipColor.GREEN)
         {
             return "background:#7CB342";
+        }
+        else if(context.Color == ShipColor.ORANGE)
+        {
+            return "background:#FF9800";
+        }
+        else if(context.Color == ShipColor.PURPLE)
+        {
+            return "background:#7B1FA2";
         }
         return "XD";
     }

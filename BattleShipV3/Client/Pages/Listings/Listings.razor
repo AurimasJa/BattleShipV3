@@ -1,5 +1,6 @@
 ﻿@page "/listingslist"
 
+@using BattleShipV3.Client.DesignPatterns.Decorator
 @using BattleShipV3.Client.DesignPatterns.Observer
 @using BattleShipV3.Client.DesignPatterns.Singleton
 @using BattleShipV3.Client.DesignPatterns.Strategy
@@ -50,7 +51,7 @@
             <MudNumericField @bind-Value="eloFrom"></MudNumericField>
             <MudText>Maximum elo</MudText>
             <MudNumericField @bind-Value="eloTo"></MudNumericField>
-            <MudButton OnClick="@CreateLobby" Class="ml-auto mr-n3 mb-1" Disabled="@(lobbyName == null || lobbyName.Length < 3)" Color="Color.Success">Create</MudButton>
+            <MudButton OnClick="@CreateDecoratedLobby" Class="ml-auto mr-n3 mb-1" Disabled="@(lobbyName == null || lobbyName.Length < 3)" Color="Color.Success">Create</MudButton>
             <MudButton OnClick="@ToggleLobbyCreate" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
         </div>
 </MudPopover>
@@ -193,14 +194,26 @@
         Navigation.NavigateTo($"/listingslist/{selectedListing.Id}");
     }
 
-    private async Task CreateLobby()
+    private async Task CreateDecoratedLobby()
     {
         if (hubConnection is null || Global.CurrentUser is null)
             return;
 
+        CreateListingComponent component = new CreateListingComponent();
+        NameDecorator nameDecorator = new NameDecorator(component, lobbyName);
+        EloFromDecorator eloDecorated = new EloFromDecorator(nameDecorator, eloFrom);
+        EloToDecorator eloToDecorated = new EloToDecorator(eloDecorated, eloTo);
+
+        await CreateLobby(eloToDecorated);
+    }
+
+    public async Task CreateLobby(CreateListingComponent listingComp)
+    {
+        Listing ListingToCreate = listingComp.GetCreatedListing();
+
         ToggleLobbyCreate();
 
-        var createdListing = new CreateListingCommand(lobbyName, eloFrom, eloTo, Global.CurrentUser);
+        var createdListing = new CreateListingCommand(ListingToCreate.Name, ListingToCreate.EloFrom.Value, ListingToCreate.EloTo.Value, Global.CurrentUser);
 
         var response = await listingService.InsertListingAsync(createdListing);
 
@@ -229,7 +242,6 @@
 
     private bool FilterFunc(Listing element, string searchString)
     {
-        Console.WriteLine(filterStrategy);
         return filterStrategy.FilterFunction(element, searchString);
     }
 

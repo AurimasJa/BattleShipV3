@@ -33,7 +33,8 @@ namespace BattleShipV3.Client.Services
 
         public async Task InsertUserShipsAsync(CreateUserShipsCommand createUserShipsCommand)
         {
-           await _httpClient.PostAsync($"{baseUrl}/pointsshop", RequestHelper.GetStringContentFromObject(createUserShipsCommand));
+            Console.WriteLine($"{baseUrl}/pointsshop");
+            await _httpClient.PostAsync($"{baseUrl}/pointsshop", RequestHelper.GetStringContentFromObject(createUserShipsCommand));
         }
 
         public async Task RemoveUserSelectedShip(int userId, int shipId)

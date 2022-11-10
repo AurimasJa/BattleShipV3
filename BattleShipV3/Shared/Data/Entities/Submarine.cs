@@ -13,5 +13,10 @@
         {
             return "Submerge";
         }
+
+        public override void ChangeColor()
+        {
+            base.ChangeColor();
+        }
     }
 }

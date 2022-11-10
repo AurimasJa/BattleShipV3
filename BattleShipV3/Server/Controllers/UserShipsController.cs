@@ -55,7 +55,7 @@ namespace BattleShipV3.Server.Controllers
                 return BadRequest("Error");
             }
 
-            var user = await _usersRepository.GetUserAsync(createUserShipsCommand.User.Id);
+            var user = await _usersRepository.GetUserAsync(createUserShipsCommand.UserId);
             var ship = await _shipsRepository.GetShipAsync(createUserShipsCommand.Ship.Id);
 
             var userShips = new UserShip

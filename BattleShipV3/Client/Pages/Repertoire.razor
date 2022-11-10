@@ -1,5 +1,6 @@
 ﻿@page "/Repertoire"
 @using BattleShipV3.Client.DesignPatterns.Command
+@using BattleShipV3.Client.DesignPatterns.Facade
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared
@@ -52,7 +53,7 @@
 <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="!isShipAdded" 
     @onclick="UndoSelectShip" Style="margin:5px">Undo</MudButton>
 
-<MudTable Items="@AllShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
+<MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Owned ship</MudText>
         <MudSpacer />
@@ -95,6 +96,8 @@
 
     bool isShipAdded { get; set; } = false;
 
+    Facade facade { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         command = new SelectShipCommand(shipService, userShipService);
@@ -105,6 +108,8 @@
         }
         ownedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id);
         selectedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id, true);
+
+        facade = new Facade(userShipService, shipService, null);
 
         await InvokeAsync(StateHasChanged);
         StateHasChanged();
@@ -134,10 +139,7 @@
 
     protected async Task RemoveShip()
     {
-        await userShipService.RemoveUserSelectedShip(Global.CurrentUser.Id, selectedSelectedShip.Id);
-
-        selectedShips.Remove(selectedSelectedShip);
-        ownedShips.Add(selectedSelectedShip);
+        await facade.UserRemoveShip(selectedShips, ownedShips, selectedSelectedShip, Global.CurrentUser.Id);
         await InvokeAsync(StateHasChanged);
     }
 

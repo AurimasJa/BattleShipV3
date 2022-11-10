@@ -31,8 +31,4 @@
 		<ProjectReference Include="..\Shared\BattleShipV3.Shared.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="DesignPatterns\Observer\" />
-	</ItemGroup>
-
 </Project>
