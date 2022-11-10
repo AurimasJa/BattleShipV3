@@ -5,6 +5,7 @@
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared.Data.Models
 @using static BattleShipV3.Data.Enums
+@using BattleShipV3.Shared.Data.Interfacess
 
 <h2 style="text-align: center">@GetPhase()</h2>
 
@@ -337,9 +338,8 @@
         public int UserId { get; set; }
     }
 
-    class ActualMap
+    class ActualMap : IActualMap
     {
-        
         public List<PlaySquare> playSquaresDeep { get; set; } = new List<PlaySquare>();
         public List<PlaySquare> playSquaresShallow { get; set; } = new List<PlaySquare>();
         //public Square[,] playField { get; set; }
@@ -397,7 +397,8 @@
             for (var i = 0; i < ship.Length; i++)
             {
 
-                if (ship.Rotation == ShipRotation.HORIZONTAL){
+                if (ship.Rotation == ShipRotation.HORIZONTAL)
+                {
                     if (playField[x + i][y].squareType == SquareType.SHIP)
                     {
                         //playSquare = new PlaySquare(x+i,y,"H - Negalimas");
@@ -406,14 +407,14 @@
                         return false;
                     }
                     //playSquare = new PlaySquare(x+i,y,"H - Galimas");
-                    
+
                     PrototypeCopies(x + i, y, "H - Galimas");/*, 1, false*/
                 }
                 if (ship.Rotation == ShipRotation.VERTICAL)
                 {
                     if (playField[x][y + i].squareType == SquareType.SHIP)
                     {
-                        
+
                         PrototypeCopies(x + i, y, "V - Negalimas");/*, 2, false*/
                         return false;
                     }
@@ -425,46 +426,16 @@
             return true;
         }
 
-        private void AssignShip(Ship ship, int x, int y)
+        public void AssignShip(Ship ship, int x, int y)
         {
             playField[x][y].AssignShip(ship);
         }
-        private void PrototypeCopies(int x, int y, string actionName)/*,int rotation, bool possible*/
+        public void PrototypeCopies(int x, int y, string actionName)/*,int rotation, bool possible*/
         {
-            PlaySquare playSquare = new PlaySquare(x,y,actionName);
+            PlaySquare playSquare = new PlaySquare(x, y, actionName);
             playSquaresDeep.Add(playSquare.DeepCopy());
             playSquaresShallow.Add(playSquare.ShallowCopy());
         }
-
     }
 
-    public class Square
-    {
-        public SquareType squareType { get; set; }
-        public Ship? ship { get; set; }
-
-        public Square(SquareType squareType, Ship ship)
-        {
-            this.squareType = squareType;
-            this.ship = ship;
-        }
-
-        public void AssignShip(Ship ship)
-        {
-            this.ship = ship;
-            this.squareType = SquareType.SHIP;
-        }
-
-        public bool LandMissile()
-        {
-            if(squareType == SquareType.SHIP)
-            {
-                squareType = SquareType.DESTROYED;
-                return true;
-            }
-
-            squareType = SquareType.MISSED;
-            return false;
-        }
-    }
 }
