@@ -1,0 +1,32 @@
+﻿@page "/observer"
+@using BattleShipV3.Shared.Data.Models
+
+<h3>Observer</h3>
+
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" OnClick="Increment">@subject.Count</MudButton>
+
+@foreach (var item in subject.Observers)
+{
+    <MudText>@item.Text</MudText>
+}
+
+@code {
+    ButtonSubject subject = new ButtonSubject();
+
+    protected override async Task OnInitializedAsync()
+    {
+        for (var i = 0; i < 4; i++)
+        {
+            subject.Attach(new TextObserver());
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Increment()
+    {
+        subject.Count += 1;
+        subject.Notify();
+        StateHasChanged();
+    }
+}

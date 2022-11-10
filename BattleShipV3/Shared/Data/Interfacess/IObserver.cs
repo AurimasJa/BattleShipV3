@@ -2,6 +2,7 @@
 {
     public interface IObserver
     {
+        string Text { get; set; }
         void Update(ISubject subject);
     }
 }

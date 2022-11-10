@@ -6,7 +6,7 @@ using BattleShipV3.Client.DesignPatterns.Observer;
 
 namespace BattleShipV3.Models
 {
-    public class Listing : ISubject
+    public class Listing
     {
         [Key]
         public int Id { get; set; }
@@ -20,27 +20,5 @@ namespace BattleShipV3.Models
         public string PlayerOneConnId { get; set; } = "";
         [NotMapped]
         public string PlayerTwoConnId { get; set; } = "";
-
-        [NotMapped]
-        private List<IObserver> Observers { get; set; } = new List<IObserver>();
-        [NotMapped]
-        public Func<Task> AlertObserversFunc { get; set; }
-
-        public void Attach(IObserver observer)
-        {
-            Observers.Add(observer);
-        }
-
-        public void Detach(IObserver observer)
-        {
-            Observers.Remove(observer);
-        }
-
-        public async Task Notify()
-        {
-            if (AlertObserversFunc == null)
-                return;
-            await AlertObserversFunc.Invoke();
-        }
     }
 }

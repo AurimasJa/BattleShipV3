@@ -52,7 +52,7 @@
 <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="!isShipAdded" 
     @onclick="UndoSelectShip" Style="margin:5px">Undo</MudButton>
 
-<MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
+<MudTable Items="@AllShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Owned ship</MudText>
         <MudSpacer />
@@ -84,6 +84,7 @@
 @code {
     List<Ship> selectedShips { get; set; }
     List<Ship> ownedShips { get; set; }
+    List<Ship> AllShips { get; set; }
 
     Ship selectedSelectedShip { get; set; }
     Ship selectedOwnedShip { get; set; }

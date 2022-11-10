@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Data.Models
 {
-    public class Observer : IObserver
+    public class TextObserver : IObserver
     {
-        public string ConnectionString { get; set; }
+        public string Text { get; set; } = "0";
 
         public void Update(ISubject subject)
         {
-            throw new NotImplementedException();
+            this.Text = subject.Count.ToString();
         }
     }
 }
