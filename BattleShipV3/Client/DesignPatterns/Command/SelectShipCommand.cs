@@ -8,7 +8,6 @@ namespace BattleShipV3.Client.DesignPatterns.Command
     {
         ShipService _shipService;
         UserShipsService _userShipService;
-        Node _node;
         public SelectShipCommand(ShipService shipService, UserShipsService userShipService)
         {
             this._shipService = shipService;
@@ -16,25 +15,6 @@ namespace BattleShipV3.Client.DesignPatterns.Command
         }
         public async Task Execute(int userId, int shipId)
         {
-            if(_node == null)
-            {
-                _node = new Node()
-                {
-                    shipId = shipId,
-                    userId = userId,
-                    nextNode = null
-                };
-            }
-            else
-            {
-                var newNode = new Node()
-                {
-                    shipId = shipId,
-                    userId = userId,
-                    nextNode = _node
-                };
-                _node = newNode;
-            }
             CreateUserSelectedShipCommand cmd = new CreateUserSelectedShipCommand(userId, shipId);
 
             await _shipService.InsertUserSelectedShipAsync(cmd);
@@ -43,13 +23,6 @@ namespace BattleShipV3.Client.DesignPatterns.Command
         public async Task Undo(int userId, int shipId)
         {
             await _userShipService.RemoveUserSelectedShip(userId, shipId);
-        }
-
-        class Node
-        {
-            public int shipId { get; set; }
-            public int userId { get; set; }
-            public Node? nextNode { get; set; }
         }
     }
 }
