@@ -30,6 +30,10 @@ public class ShipsController : ControllerBase
         _usersRepository = userRepository;
     }
 
+    public ShipsController()
+    {
+    }
+
     //[HttpGet("{id}")]
     //public async Task<ActionResult<Ship>> GetShipAsync(int? id)
     //{
