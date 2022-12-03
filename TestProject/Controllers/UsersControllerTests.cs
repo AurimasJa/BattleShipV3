@@ -14,6 +14,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using static MudBlazor.CategoryTypes;
 
 namespace TestProject.Controllers
 {
@@ -49,11 +50,11 @@ namespace TestProject.Controllers
         [TestMethod]
         public async Task GetUsersAsync_StateUnderTest_ExpectedBehavior()
         {
-            Uri uri = new Uri("https://localhost:5001/users");
+            Uri uri = new Uri("https://localhost:5001/users/");
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
 
             var response = httpClient.Send(message);
-            Assert.IsTrue(response.IsSuccessStatusCode);
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
         }
         [TestMethod]
         public async Task CreateUserAsync_StateUnderTest_ExpectedBehavior()
@@ -62,18 +63,20 @@ namespace TestProject.Controllers
 
             CreateUserCommand createUserCommand = new CreateUserCommand("Darius", "Darius@mail.com", "passwoorrd");
             var response = httpClient.PostAsync(uri, RequestHelper.GetStringContentFromObject(createUserCommand));
-            Console.WriteLine(response.Status);
-            Assert.IsTrue(response.Result.IsSuccessStatusCode);
+
+            Assert.AreEqual(response.Result.StatusCode, System.Net.HttpStatusCode.Created);
         }
         public Mock paymentServiceMock = new Mock<IUsersRepository>();
         [TestMethod]
         public async Task Method_GetUserAsync_StateUnderTest_ExpectedBehavior()
         {
 
-            var usersController = this.CreateUsersController();
-            var okResult = usersController.GetUserAsync(1);
-            Assert.AreEqual(okResult.Result.Value.Name, "laucek");
-           
+            Uri uri = new Uri("https://localhost:5001/users/1");
+            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
+
+            var response = httpClient.Send(message);
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+
         }
 
         [TestMethod]
@@ -85,7 +88,7 @@ namespace TestProject.Controllers
 
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
             var response = httpClient.Send(message);
-            Assert.IsTrue(response.IsSuccessStatusCode);
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
         }
 
 
@@ -93,34 +96,27 @@ namespace TestProject.Controllers
         [TestMethod]
         public async Task UpdateUserAsync_StateUnderTest_ExpectedBehavior()
         {
-            //string page = "https://localhost:5001/users" + "/email?email=Darius@mail.com";
-            //Uri uri = new Uri(page);
-            //UpdateUserCommand updateUserCommand = new UpdateUserCommand("Darius", "Darius@mail.com", null, null,null);
-            //_httpClient.PutAsync($"{baseUrl}/users/{id}", RequestHelper.GetStringContentFromObject(updateUserCommand));
+            //ID KEIST
+            string page = "https://localhost:5001/users" + "/25";
+            Uri uri = new Uri(page);
 
-            //HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
-            //var response = httpClient.Send(message);
-            //var jsonString = await response.Content.ReadAsStringAsync();
-            //var user = JsonConvert.DeserializeObject<object>(jsonString);
-            
-            //HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Put, uri);
-            //Assert.IsTrue(response.IsSuccessStatusCode);
+            UpdateUserCommand updateUserCommand = new UpdateUserCommand("asd", null, null, null, null);
+            var response = httpClient.PutAsync(uri, RequestHelper.GetStringContentFromObject(updateUserCommand));
+
+            Assert.AreEqual(response.Result.StatusCode, System.Net.HttpStatusCode.OK);
         }
 
         [TestMethod]
         public async Task Remove_StateUnderTest_ExpectedBehavior()
         {
-            // Arrange
-            var usersController = this.CreateUsersController();
-            int userId = 0;
+            //ID KEIST
+            string page = "https://localhost:5001/users" + "/25";
+            Uri uri = new Uri(page);
 
-            // Act
-            var result = await usersController.Remove(
-                userId);
+            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Delete, uri);
+            var response = httpClient.Send(message);
 
-            // Assert
-            Assert.Fail();
-            this.mockRepository.VerifyAll();
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.NoContent);
         }
     }
 }
