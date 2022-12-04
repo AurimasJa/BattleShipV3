@@ -1,4 +1,5 @@
-﻿using BattleShipV3.Shared.Data;
+﻿using BattleShipV3.Models;
+using BattleShipV3.Shared.Data;
 using BattleShipV3.Shared.Data.Commands.User.Create;
 using BattleShipV3.Shared.Data.Commands.User.Update;
 using BattleShipV3.Shared.Data.Commands.UserShips.Create;
@@ -38,7 +39,10 @@ public class UserService
     //public async Task<List<>>
     public async Task<HttpResponseMessage> InsertUserAsync(CreateUserCommand createUserCommand)
     {
-        return await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(createUserCommand));
+        var response = await _httpClient.PostAsync($"{baseUrl}/users", RequestHelper.GetStringContentFromObject(createUserCommand));
+        var user = JsonConvert.DeserializeObject<User>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+        response.Content = new StringContent(user.Id.ToString());
+        return response;
     }
     public async Task<HttpResponseMessage> UpdateUserAsync(int id,UpdateUserCommand updateUserCommand)
     {

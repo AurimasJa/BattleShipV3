@@ -26,26 +26,19 @@ namespace TestProject.Controllers
         private readonly Mock<HttpRequest> _request;
         private readonly Mock<IUsersRepository> _usersRepository;
 
-
         private MockRepository mockRepository;
 
         private Mock<IUsersRepository> mockUsersRepository;
+        private HttpClient httpClient = new HttpClient();
+        private UserService _userService;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            this.mockRepository = new MockRepository(MockBehavior.Strict);
-
-            this.mockUsersRepository = this.mockRepository.Create<IUsersRepository>();
+            Uri uri = new Uri("https://localhost:5001");
+            httpClient.BaseAddress = uri;
+            _userService = new UserService(httpClient);
         }
-
-        private UsersController CreateUsersController()
-        {
-            //UsersRepository usersRepository = new UsersRepository()
-            return new UsersController(
-                this.mockUsersRepository.Object);
-        }
-        public HttpClient httpClient = new HttpClient();
 
         [TestMethod]
         public async Task GetUsersAsync_StateUnderTest_ExpectedBehavior()
@@ -59,24 +52,18 @@ namespace TestProject.Controllers
         [TestMethod]
         public async Task CreateUserAsync_StateUnderTest_ExpectedBehavior()
         {
-            Uri uri = new Uri("https://localhost:5001/users");
-
             CreateUserCommand createUserCommand = new CreateUserCommand("Darius", "Darius@mail.com", "passwoorrd");
-            var response = httpClient.PostAsync(uri, RequestHelper.GetStringContentFromObject(createUserCommand));
+            var response = await _userService.InsertUserAsync(createUserCommand);
 
-            Assert.AreEqual(response.Result.StatusCode, System.Net.HttpStatusCode.Created);
+            TestsHelper._InsertedUserId = int.Parse(await response.Content.ReadAsStringAsync());
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.Created);
         }
         public Mock paymentServiceMock = new Mock<IUsersRepository>();
         [TestMethod]
         public async Task Method_GetUserAsync_StateUnderTest_ExpectedBehavior()
         {
-
-            Uri uri = new Uri("https://localhost:5001/users/1");
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
-
-            var response = httpClient.Send(message);
-            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
-
+            var response = await _userService.GetUserAsync(TestsHelper._InsertedUserId.Value);
+            Assert.IsNotNull(response);
         }
 
         [TestMethod]
@@ -96,9 +83,7 @@ namespace TestProject.Controllers
         [TestMethod]
         public async Task UpdateUserAsync_StateUnderTest_ExpectedBehavior()
         {
-            //ID KEIST
-            string page = "https://localhost:5001/users" + "/25";
-            Uri uri = new Uri(page);
+            Uri uri = new Uri($"https://localhost:5001/users/{TestsHelper._InsertedUserId}");
 
             UpdateUserCommand updateUserCommand = new UpdateUserCommand("asd", null, null, null, null);
             var response = httpClient.PutAsync(uri, RequestHelper.GetStringContentFromObject(updateUserCommand));
@@ -107,12 +92,9 @@ namespace TestProject.Controllers
         }
 
         [TestMethod]
-        public async Task Remove_StateUnderTest_ExpectedBehavior()
+        public async Task zRemove_StateUnderTest_ExpectedBehavior()
         {
-            //ID KEIST
-            string page = "https://localhost:5001/users" + "/25";
-            Uri uri = new Uri(page);
-
+            Uri uri = new Uri($"https://localhost:5001/users/{TestsHelper._InsertedUserId}");
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Delete, uri);
             var response = httpClient.Send(message);
 

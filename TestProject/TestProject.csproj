@@ -20,4 +20,8 @@
     <ProjectReference Include="..\BattleShipV3\Server\BattleShipV3.Server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>
