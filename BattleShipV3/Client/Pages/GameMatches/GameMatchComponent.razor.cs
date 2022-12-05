@@ -1,0 +1,154 @@
+﻿using BattleShipV3.Client.DesignPatterns.Builder;
+using BattleShipV3.Data.Models;
+using BattleShipV3.Shared.Data.Models;
+using BattleShipV3.Shared;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
+using static BattleShipV3.Client.Pages.GameMatches.GameMap;
+using static BattleShipV3.Data.Enums;
+
+namespace BattleShipV3.Client.Pages.GameMatches
+{
+    partial class GameMatchComponent
+    {
+        [Parameter]
+        public int ListingId { get; set; }
+        [Parameter]
+        public int PlayerOneId { get; set; }
+        [Parameter]
+        public int PlayerTwoId { get; set; }
+
+        GamePlayerModel PlayerOne { get; set; }
+        GamePlayerModel PlayerTwo { get; set; }
+
+        HubConnection? hubConnection { get; set; }
+
+        public GamePhase gamePhase;
+
+        GameMap OwnGameMap { get; set; }
+
+        public int PlayersFinishedWithShips = 0;
+
+        protected override async Task OnInitializedAsync()
+        {
+            if (Global.CurrentUser is null || (Global.CurrentUser.Id != PlayerOneId && Global.CurrentUser.Id != PlayerTwoId))
+                navigation.NavigateTo("/");
+
+            hubConnection = new HubConnectionBuilder()
+                       .WithUrl(navigation.ToAbsoluteUri("/gameHub"))
+                       .WithAutomaticReconnect()
+                       .Build();
+
+            hubConnection.On("ShipPlacementFinished", () =>
+            {
+                PlayersFinishedWithShips += 1;
+                if (PlayersFinishedWithShips == 2)
+                {
+                    ShipPhaseFinished();
+                }
+            });
+
+            hubConnection.On<int, int, int>("SendFireInfoAsync", (x, y, userId) =>
+            {
+                if (userId != PlayerOneId)
+                {
+                    OwnGameMap.MissileLand(x, y);
+                }
+            });
+
+            hubConnection.On<bool, int>("SendMissileLandResultAsync", (isHit, userId) =>
+            {
+                if (userId != PlayerOneId)
+                {
+                    OwnGameMap.AfterHit(isHit);
+                }
+            });
+
+            await hubConnection.StartAsync();
+
+            await hubConnection.SendAsync("JoinRoom", ListingId);
+
+            gamePhase = GamePhase.LAYOUT;
+            await LoadPlayersData();
+            await InvokeAsync(StateHasChanged);
+        }
+
+        protected async Task LoadPlayersData()
+        {
+            PlayerOne = new GamePlayerModel();
+            PlayerTwo = new GamePlayerModel();
+
+            PlayerOne.User = await userService.GetUserAsync(PlayerOneId);
+            PlayerTwo.User = await userService.GetUserAsync(PlayerTwoId);
+
+            var playerOneShips = await shipService.GetShipsByUserAsync(PlayerOneId, true);
+            var playerTwoShips = await shipService.GetShipsByUserAsync(PlayerTwoId, true);
+
+            BuildShips(PlayerOne, playerOneShips);
+            BuildShips(PlayerTwo, playerTwoShips);
+        }
+
+        public async Task FireMissile(FireMissileEventArgs args)
+        {
+            await hubConnection.SendAsync("SendFireInfoAsync", ListingId, args.X, args.Y, args.UserId);
+        }
+
+        public void AssignDefaultRotations(List<Ship> ships)
+        {
+            foreach (var item in ships)
+            {
+                item.Rotation = ShipRotation.HORIZONTAL;
+            }
+        }
+
+        public async Task AfterLandMissile(MissileLandEventArgs args)
+        {
+            await hubConnection.SendAsync("SendMissileLandResultAsync", ListingId, args.IsHit, args.UserId);
+        }
+
+        public void ShipPhaseFinished()
+        {
+            OwnGameMap.gamePhase = GamePhase.ACTIVE;
+            gamePhase = GamePhase.ACTIVE;
+            OwnGameMap.RefreshUI();
+        }
+
+        public async Task UserFinishedShipPhase()
+        {
+            await hubConnection.SendAsync("ShipPlacementFinished", ListingId);
+            await InvokeAsync(StateHasChanged);
+        }
+
+        public void BuildShips(GamePlayerModel player, List<Ship> ships)
+        {
+            List<Ship> builtShips = new List<Ship>();
+            foreach (var item in ships)
+            {
+                ShipBuilder shipBuilder;
+                switch (item)
+                {
+                    case Healer:
+                        shipBuilder = new HealerShipBuilder();
+                        shipBuilder.startNew(item);
+                        shipBuilder.BuildShipColor();
+                        break;
+
+                    case Submarine:
+                        shipBuilder = new SubmarineShipBuilder();
+                        shipBuilder.startNew(item);
+                        shipBuilder.BuildShipColor();
+                        break;
+
+                    default:
+                        shipBuilder = new BasicShipBuilder();
+                        shipBuilder.startNew(item);
+                        shipBuilder.BuildShipColor();
+                        break;
+                }
+                builtShips.Add(shipBuilder.GetBuildable());
+            }
+
+            player.Ships = builtShips;
+        }
+    }
+}
