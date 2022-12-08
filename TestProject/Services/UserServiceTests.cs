@@ -37,7 +37,7 @@ namespace TestProject.Services
         [TestMethod]
         public async Task CreateUserAsync_StateUnderTest_ExpectedBehavior()
         {
-            CreateUserCommand createUserCommand = new CreateUserCommand("Darius", "Darius@mail.com", "passwoorrd");
+            CreateUserCommand createUserCommand = new CreateUserCommand("Darius", "cDarius@mail.com", "passwoorrd");
             var response = await _userService.InsertUserAsync(createUserCommand);
 
             TestsHelper._InsertedUserId = int.Parse(await response.Content.ReadAsStringAsync());
@@ -54,13 +54,9 @@ namespace TestProject.Services
         [TestMethod]
         public async Task GetUserByEmailAsync_StateUnderTest_ExpectedBehavior()
         {
-            string page = "https://localhost:5001/users" + "/email?email=Darius@mail.com";
-            Uri uri = new Uri(page);
 
-
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
-            var response = httpClient.Send(message);
-            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+            var response = await _userService.GetUserAsync("Darius@mail.com");
+            Assert.IsNotNull(response);
         }
 
 
@@ -73,13 +69,6 @@ namespace TestProject.Services
             var response = await _userService.UpdateUserAsync(TestsHelper._InsertedUserId.Value, updateUserCommand);
 
             Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
-
-            //    Uri uri = new Uri($"https://localhost:5001/users/{TestsHelper._InsertedUserId}");
-
-            //    UpdateUserCommand updateUserCommand = new UpdateUserCommand("asd", null, null, null, null);
-            //    var response = httpClient.PutAsync(uri, RequestHelper.GetStringContentFromObject(updateUserCommand));
-
-            //    Assert.AreEqual(response.Result.StatusCode, System.Net.HttpStatusCode.OK);
         }
 
         [TestMethod]
@@ -88,11 +77,6 @@ namespace TestProject.Services
             var response = await _userService.DeleteUserAsync(TestsHelper._InsertedUserId.Value);
 
             Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.NoContent);
-            //Uri uri = new Uri($"https://localhost:5001/users/{TestsHelper._InsertedUserId}");
-            //HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Delete, uri);
-            //var response = httpClient.Send(message);
-
-            //Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.NoContent);
         }
     }
 }

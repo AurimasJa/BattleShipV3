@@ -62,8 +62,12 @@ namespace TestProject.Controllers
         [TestMethod]
         public async Task Method_GetUserAsync_StateUnderTest_ExpectedBehavior()
         {
-            var response = await _userService.GetUserAsync(TestsHelper._InsertedUserId.Value);
-            Assert.IsNotNull(response);
+            Uri uri = new Uri($"https://localhost:5001/users/{TestsHelper._InsertedUserId}");
+
+            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, uri);
+            var response = httpClient.Send(message);
+
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
         }
 
         [TestMethod]
