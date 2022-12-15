@@ -1,5 +1,6 @@
 ﻿using BattleShipV3.Data.Models;
 using BattleShipV3.Shared.Data.Interfacess;
+using BattleShipV3.Shared.Visitoras.Visitor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,12 @@ namespace BattleShipV3.Shared.Data.Models
             cost *= (1 - Discount);
             return cost;
         }
+
+        public double accept(Visitor visitor)
+        {
+            return visitor.visit(this);
+        }
+
         public CashPurchase(Ship ship)
         {
             this.Ship = ship;

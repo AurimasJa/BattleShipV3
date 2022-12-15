@@ -1,5 +1,6 @@
 ﻿using BattleShipV3.Data.Models;
 using BattleShipV3.Shared.Data.Interfacess;
+using BattleShipV3.Shared.Visitoras.Visitor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,12 @@ namespace BattleShipV3.Shared.Data.Models
         {
             return 1;
         }
+
+        public double accept(Visitor visitor)
+        {
+            return visitor.visit(this);
+        }
+
         public TicketPurchase(Ship ship)
         {
             this.Ship = ship;

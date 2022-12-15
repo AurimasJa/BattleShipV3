@@ -10,6 +10,7 @@
 @using BattleShipV3.Shared.Data.Commands.User.Update
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
 @using BattleShipV3.Shared.Data.Interfacess
+@using BattleShipV3.Shared.Visitoras.Visitor
 @using MudBlazor
 @using Models
 @using Data
@@ -121,6 +122,10 @@
     {
         //template method
         IPurchase purchase = PurchaseSwitch(ship);
+        Console.WriteLine(purchase.Cost + " before");
+        purchase.accept(new TaxVisitor());
+        Console.WriteLine(purchase.Cost + " after");
+        //purchase.Accept(new IncomeVisitor());
         return purchaseType == PurchaseType.CASH ? $"${purchase.Cost}" : purchase.Cost.ToString();
 
 
@@ -158,7 +163,7 @@
     {
         //template method
         IPurchase purchase = PurchaseSwitch(selectedShip);
-
+        
         await facade.HandleShipPurchase(purchase, purchaseType.Value, selectedShip, ownedShips);
 
 

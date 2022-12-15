@@ -39,5 +39,6 @@ namespace BattleShipV3.Client.DesignPatterns.Lab2.Template
         {
             this.Discount = 0.5;
         }
+
     }
 }
