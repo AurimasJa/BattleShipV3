@@ -1,4 +1,5 @@
-﻿@using BattleShipV3.Client.DesignPatterns
+﻿@using BattlePlaySquareV3.Client.DesignPatterns.Lab2.FlyWeight;
+@using BattleShipV3.Client.DesignPatterns
 @using BattleShipV3.Client.DesignPatterns.Bridge
 @using BattleShipV3.Client.DesignPatterns.Command
 @using BattleShipV3.Client.DesignPatterns.Prototype
@@ -346,6 +347,8 @@
         public List<Square[]> playField { get; set; }
         public PlaySquare oneplaySquare { get; set; }
 
+        FlyWeightFactory factory = new FlyWeightFactory();
+
         public ActualMap()
         {
             playField = new List<Square[]>();
@@ -433,8 +436,10 @@
         public void PrototypeCopies(int x, int y, string actionName)/*,int rotation, bool possible*/
         {
             PlaySquare playSquare = new PlaySquare(x, y, actionName);
-            playSquaresDeep.Add(playSquare.DeepCopy());
-            playSquaresShallow.Add(playSquare.ShallowCopy());
+            var flyWeight = factory.GetFlyweight(playSquare);
+            var (deep, shallow) = flyWeight.GetCopies();
+            playSquaresDeep.Add(deep);
+            playSquaresShallow.Add(shallow);
         }
     }
 

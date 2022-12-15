@@ -1,5 +1,6 @@
 ﻿@page "/listingslist"
 
+@using BattlePlaySquareV3.Client.DesignPatterns.Lab2.FlyWeight
 @using BattleShipV3.Client.DesignPatterns.Decorator
 @using BattleShipV3.Client.DesignPatterns.Observer
 @using BattleShipV3.Client.DesignPatterns.Singleton
@@ -92,7 +93,7 @@
 </div>
 
 
-@code {
+    @code {
     private HubConnection? hubConnection;
     private string searchString = "";
     private Listing selectedListing;

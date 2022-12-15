@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using static BattleShipV3.Data.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using BattleShipV3.Client.DesignPatterns;
+using System.ComponentModel;
 
 namespace BattleShipV3.Data.Models
 {
@@ -13,7 +14,7 @@ namespace BattleShipV3.Data.Models
     [JsonSubtypes.KnownSubType(typeof(Healer), "Healer")]
     [JsonSubtypes.KnownSubType(typeof(Submarine), "Submarine")]
     [JsonSubtypes.KnownSubType(typeof(Basic), "Ship")]
-    public class Ship
+    public class Ship : BattleShipV3.Client.DesignPatterns.Lab2.Composite.Component
     {
         public int Id { get; set; }
         public string Name { get; set; }

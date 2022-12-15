@@ -2,6 +2,7 @@
 
 @using BattleShipV3.Client.DesignPatterns.Facade
 @using BattleShipV3.Client.DesignPatterns.Factory
+@using BattleShipV3.Client.DesignPatterns.Lab2.Template;
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data
 @using BattleShipV3.Data.Models
@@ -109,49 +110,75 @@
         StateHasChanged();
     }
 
+    public IPurchase PurchaseSwitch(Ship ship) => purchaseType switch
+    {
+        PurchaseType.TICKET => CreatePurchase(new TicketTemplate(ship)),
+        PurchaseType.CASH => CreatePurchase(new CashTemplate(ship)),
+        _ => CreatePurchase(new PointsTemplate(ship))
+    };
+
     protected string GetCost(Ship ship)
     {
-        IPurchase purchase;
-        if (ship is null)
-            return "";
+        //template method
+        IPurchase purchase = PurchaseSwitch(ship);
+        return purchaseType == PurchaseType.CASH ? $"${purchase.Cost}" : purchase.Cost.ToString();
 
-        switch (purchaseType)
-        {
-            case PurchaseType.TICKET:
-                purchase = CreatePurchase(new TicketPurchaseFactory(), ship);
-                break;
-            case PurchaseType.CASH:
-                purchase = CreatePurchase(new CashPurchaseFactory(), ship);
-                break;
-            default:
-                purchase = CreatePurchase(new PointsPurchaseFactory(), ship);
-                break;
 
-        }
-        if (purchaseType == PurchaseType.CASH)
-            return "$" + purchase.Cost;
+        //Factory method:
 
-        return purchase.Cost.ToString();
+        //IPurchase purchase;
+        //if (ship is null)
+        //    return "";
+
+        //switch (purchaseType)
+        //{
+        //    case PurchaseType.TICKET:
+        //        purchase = CreatePurchase(new TicketPurchaseFactory(), ship);
+        //        break;
+        //    case PurchaseType.CASH:
+        //        purchase = CreatePurchase(new CashPurchaseFactory(), ship);
+        //        break;
+        //    default:
+        //        purchase = CreatePurchase(new PointsPurchaseFactory(), ship);
+        //        break;
+
+        //}
+        //if (purchaseType == PurchaseType.CASH)
+        //    return "$" + purchase.Cost;
+
+        //return purchase.Cost.ToString();
+    }
+
+    protected IPurchase CreatePurchase(TemplateBase template)
+    {
+        return template.GetPurchase();
     }
 
     protected async Task BuyShip()
     {
-        IPurchase purchase;
-
-        switch(purchaseType)
-        {
-            case PurchaseType.TICKET:
-                purchase = CreatePurchase(new TicketPurchaseFactory(), selectedShip);
-                break;
-            case PurchaseType.CASH:
-                purchase = CreatePurchase(new CashPurchaseFactory(), selectedShip);
-                break;
-            default:
-                purchase = CreatePurchase(new PointsPurchaseFactory(), selectedShip);
-                break;
-        }
+        //template method
+        IPurchase purchase = PurchaseSwitch(selectedShip);
 
         await facade.HandleShipPurchase(purchase, purchaseType.Value, selectedShip, ownedShips);
+
+
+        //Factory method
+        //IPurchase purchase;
+
+        //switch(purchaseType)
+        //{
+        //    case PurchaseType.TICKET:
+        //        purchase = CreatePurchase(new TicketPurchaseFactory(), selectedShip);
+        //        break;
+        //    case PurchaseType.CASH:
+        //        purchase = CreatePurchase(new CashPurchaseFactory(), selectedShip);
+        //        break;
+        //    default:
+        //        purchase = CreatePurchase(new PointsPurchaseFactory(), selectedShip);
+        //        break;
+        //}
+
+        //await facade.HandleShipPurchase(purchase, purchaseType.Value, selectedShip, ownedShips);
         await InvokeAsync(StateHasChanged);
     }
 

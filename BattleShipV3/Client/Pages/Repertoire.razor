@@ -1,6 +1,7 @@
 ﻿@page "/Repertoire"
 @using BattleShipV3.Client.DesignPatterns.Command
 @using BattleShipV3.Client.DesignPatterns.Facade
+@using BattleShipV3.Client.DesignPatterns.Lab2.Composite;
 @using BattleShipV3.Client.Services
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared
@@ -53,34 +54,45 @@
 <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="!isShipAdded" 
     @onclick="UndoSelectShip" Style="margin:5px">Undo</MudButton>
 
-<MudTable Items="@ownedShips" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Owned ship</MudText>
-        <MudSpacer />
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>Ship Name</MudTh>
-        <MudTh>Ship Length</MudTh>
-        <MudTh>Special</MudTh>
-        <MudTh>Special Bonus</MudTh>
-        <MudTh>Missile Name</MudTh>
-        <MudTh>Missile Type</MudTh>
-        <MudTh>Missile Cooldown</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTh>@context.Name</MudTh>
-        <MudTh>@context.Length</MudTh>
-        <MudTh>@context.GetSpecialtyName()</MudTh>
-        <MudTh>@context.GetSpecialtyBonus()</MudTh>
-        <MudTh>@context.Missile.Name</MudTh>
-        <MudTh>@context.Missile.MissileType</MudTh>
-        <MudTh>@context.Missile.Cooldown</MudTh>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager />
-    </PagerContent>
 
-</MudTable>
+@if(composite != null)
+{
+    @foreach (var group in composite.GetChildren())
+{
+        <MudTable Items="@(GetLeaves(group))" Hover="true" Striped="true" @bind-SelectedItem="selectedOwnedShip">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Owned ship</MudText>
+            <MudSpacer />
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Ship Name</MudTh>
+            <MudTh>Ship Length</MudTh>
+            <MudTh>Special</MudTh>
+            <MudTh>Special Bonus</MudTh>
+            <MudTh>Missile Name</MudTh>
+            <MudTh>Missile Type</MudTh>
+            <MudTh>Missile Cooldown</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTh>@context.Name</MudTh>
+            <MudTh>@context.Length</MudTh>
+            <MudTh>@context.GetSpecialtyName()</MudTh>
+            <MudTh>@context.GetSpecialtyBonus()</MudTh>
+            <MudTh>@context.Missile.Name</MudTh>
+            <MudTh>@context.Missile.MissileType</MudTh>
+            <MudTh>@context.Missile.Cooldown</MudTh>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+
+    </MudTable>
+    }
+}
+
+
+
+
 
 @code {
     List<Ship> selectedShips { get; set; }
@@ -98,6 +110,8 @@
 
     Facade facade { get; set; }
 
+    Composite composite { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         command = new SelectShipCommand(shipService, userShipService);
@@ -111,6 +125,16 @@
 
         facade = new Facade(userShipService, shipService, null);
 
+        BuildComposite();
+
+        foreach (var item in composite.GetChildren())
+        {
+            foreach (var ship in ((Composite)item).GetChildren())
+            {
+                Console.WriteLine(((Ship)ship).Length);
+            }
+        }
+
         await InvokeAsync(StateHasChanged);
         StateHasChanged();
     }
@@ -122,6 +146,33 @@
         selectedShips.Remove(selectedSelectedShip);
         ownedShips.Add(selectedSelectedShip);
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected IEnumerable<Ship> GetLeaves(Component component)
+    {
+        var children = (component as Composite).GetChildren();
+        foreach (var item in children)
+        {
+            yield return (Ship)item;
+        }
+    }
+
+    protected void BuildComposite()
+    {
+        composite = new Composite();
+        var shipGroups = ownedShips.GroupBy(e => e.Length);
+        foreach (var group in shipGroups)
+        {
+            var list = group.ToList();
+
+            var branch = new Composite();
+            foreach (var ship in list)
+            {
+                branch.Add(ship);
+            }
+
+            composite.Add(branch);
+        }
     }
 
     protected async Task AddShip()
