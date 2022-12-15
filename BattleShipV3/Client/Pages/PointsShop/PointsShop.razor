@@ -4,6 +4,7 @@
 @using BattleShipV3.Client.DesignPatterns.Factory
 @using BattleShipV3.Client.DesignPatterns.Lab2.Template;
 @using BattleShipV3.Shared
+@using BattleShipV3.Shared.Chain
 @using BattleShipV3.Shared.Data
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Client.Services
@@ -117,14 +118,42 @@
         PurchaseType.CASH => CreatePurchase(new CashTemplate(ship)),
         _ => CreatePurchase(new PointsTemplate(ship))
     };
+    public static void ClientCode(AbstractHandler handler)
+    {
+        foreach (var food in new List<string> { "10", "20", "Cup of coffee" })
+        {
+            Console.WriteLine($"Client: Who wants a {food}?");
 
+            var result = handler.Handle(food);
+
+            if (result != null)
+            {
+                Console.Write($"   {result}");
+            }
+            else
+            {
+                Console.WriteLine($"   {food} was left untouched.");
+            }
+        }
+    }
     protected string GetCost(Ship ship)
     {
         //template method
         IPurchase purchase = PurchaseSwitch(ship);
-        Console.WriteLine(purchase.Cost + " before");
         purchase.accept(new TaxVisitor());
-        Console.WriteLine(purchase.Cost + " after");
+        var monkey = new AddNumbers(purchase.Cost);
+        var squirrel = new MultNumbers(purchase.Cost);
+
+        monkey.SetNext(squirrel);
+
+        // The client should be able to send a request to any handler, not
+        // just the first one in the chain.
+        Console.WriteLine("Chain: Monkey > Squirrel > Dog\n");
+        ClientCode(monkey);
+        Console.WriteLine();
+
+        Console.WriteLine("Subchain: Squirrel > Dog\n");
+        ClientCode(squirrel);
         //purchase.Accept(new IncomeVisitor());
         return purchaseType == PurchaseType.CASH ? $"${purchase.Cost}" : purchase.Cost.ToString();
 
