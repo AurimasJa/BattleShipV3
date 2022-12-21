@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Chain
 {
-    public class AddNumbers : AbstractHandler
+    public class PointsHandlerChain : AbstractHandler
     {
-        double number { get; set; }
+        //double number { get; set; }
 
-        public AddNumbers(double number)
-        {
-            this.number = number;
-        }
+        //public AddNumbers(double number)
+        //{
+        //    this.number = number;
+        //}
 
         public override object Handle(object request)
         {
-            if ((request as string) == "20")
+            if ((request as string) == "POINTS")
             {
-                return number + 10;
+                return "For any information you need to contact POINTS@BattleShipV3.com";
             }
             else
             {

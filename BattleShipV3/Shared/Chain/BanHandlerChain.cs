@@ -6,25 +6,18 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Chain
 {
-    public class MultNumbers : AbstractHandler
+    public class BanHandlerChain : AbstractHandler
     {
-        double number;
-
-        public MultNumbers(double number)
-        {
-            this.number = number;
-        }
         public override object Handle(object request)
         {
-            if (request.ToString() == "10")
+            if ((request as string) == "BAN")
             {
-                return 10 * number;
+                return "For any information you need to contact BAN@BattleShipV3.com";
             }
             else
             {
                 return base.Handle(request);
             }
         }
-
     }
 }
