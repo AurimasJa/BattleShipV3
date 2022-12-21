@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Proxy
 {
-    public class SecureNestProxy : Proxy
+    public class SecureNestProxy : IProxy
     {
-        private readonly Proxy nest;
+        private readonly IProxy nest;
 
-        public SecureNestProxy(Proxy nest)
+        public SecureNestProxy(IProxy nest)
         {
             this.nest = nest;
         }

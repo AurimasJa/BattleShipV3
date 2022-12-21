@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Proxy
 {
-    public class RealNest : Proxy
+    public class RealNest : IProxy
     {
         public bool Access(string name)
         {

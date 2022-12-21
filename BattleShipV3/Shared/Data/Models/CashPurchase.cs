@@ -35,7 +35,7 @@ namespace BattleShipV3.Shared.Data.Models
             return cost;
         }
 
-        public double accept(Visitor visitor)
+        public double accept(IVisitor visitor)
         {
             return visitor.visit(this);
         }

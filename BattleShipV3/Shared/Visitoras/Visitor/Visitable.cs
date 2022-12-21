@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Visitoras.Visitor
 {
-    public interface Visitable
+    public interface IVisitable
     {
 
-        public double accept(Visitor visitor);
+        public double accept(IVisitor visitor);
 
     }
 }

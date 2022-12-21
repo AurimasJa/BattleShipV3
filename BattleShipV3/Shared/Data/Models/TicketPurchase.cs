@@ -19,7 +19,7 @@ namespace BattleShipV3.Shared.Data.Models
             return 1;
         }
 
-        public double accept(Visitor visitor)
+        public double accept(IVisitor visitor)
         {
             return visitor.visit(this);
         }
