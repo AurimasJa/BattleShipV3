@@ -3,6 +3,7 @@ using BattleShipV3.Models;
 using BattleShipV3.Shared.Data.Commands.User.Create;
 using Microsoft.AspNetCore.Mvc;
 using BattleShipV3.Shared.Data.Commands.User.Update;
+using BattleShipV3.Server.Mediator;
 
 namespace BattleShipV3.Server.Controllers;
 
@@ -74,41 +75,56 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<User>> CreateUserAsync(CreateUserCommand createUserCommand)
     {
-        if(createUserCommand == null)
+        ////Comment this and then try catch the exception from mediator bs
+        //if(createUserCommand == null)
+        //    return BadRequest("Error");
+        //if (createUserCommand.Name == null)
+        //    return BadRequest("Name can not be empty");
+        //if (createUserCommand.Password == null)
+        //    return BadRequest("Password can not be empty");
+        //if (createUserCommand.Email == null || !(createUserCommand.Email.Contains('@')))
+        //    return BadRequest("Email is not valid");
+        //if (createUserCommand.Password.Length < 3)
+        //    return BadRequest("Your password is too short");
+
+        try
         {
-            return BadRequest("Error");
+            CreateUserValidator validator = new CreateUserValidator();
+            UserBuilder builder = new UserBuilder();
+
+            new UserMediator(this._usersRepository, validator, builder);
+
+            var user = await validator.ValidateForBadRequest(createUserCommand);
+
+            return Created("", user);
         }
-
-        if (createUserCommand.Name == null)
-            return BadRequest("Name can not be empty");
-        if (createUserCommand.Password == null)
-            return BadRequest("Password can not be empty");
-        if (createUserCommand.Email == null || !(createUserCommand.Email.Contains('@')))
-            return BadRequest("Email is not valid");
-        if (createUserCommand.Password.Length < 3)
-            return BadRequest("Your password is too short");
-
-        var user = new User
+        catch (ArgumentException ex)
         {
-            Name = createUserCommand.Name,
-            Email = createUserCommand.Email,
-            Password = createUserCommand.Password,
-            CreationDate = DateTime.UtcNow,
-            Elo = 0,
-            Points = 0
-        };
+            return BadRequest(ex.Message);
+        }
+        
 
-        await _usersRepository.CreateUserAsync(user);
-        return Created("", new User
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            Password = user.Password,
-            CreationDate = user.CreationDate,
-            Elo = user.Elo,
-            Points = user.Points
-        });
+        //var user = new User
+        //{
+        //    Name = createUserCommand.Name,
+        //    Email = createUserCommand.Email,
+        //    Password = createUserCommand.Password,
+        //    CreationDate = DateTime.UtcNow,
+        //    Elo = 0,
+        //    Points = 0
+        //};
+
+        //await _usersRepository.CreateUserAsync(user);
+        //return Created("", new User
+        //{
+        //    Id = user.Id,
+        //    Name = user.Name,
+        //    Email = user.Email,
+        //    Password = user.Password,
+        //    CreationDate = user.CreationDate,
+        //    Elo = user.Elo,
+        //    Points = user.Points
+        //});
     }
 
     [HttpPut]
