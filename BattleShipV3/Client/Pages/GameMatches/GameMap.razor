@@ -2,6 +2,7 @@
 @using BattleShipV3.Client.DesignPatterns
 @using BattleShipV3.Client.DesignPatterns.Bridge
 @using BattleShipV3.Client.DesignPatterns.Command
+@using BattleShipV3.Client.DesignPatterns.Lab2.Interpreter;
 @using BattleShipV3.Client.DesignPatterns.Memento
 @using BattleShipV3.Client.DesignPatterns.Prototype
 @using BattleShipV3.Data.Models
@@ -145,8 +146,13 @@
     }
 }
 
-
-
+@if(commandErrorMsg != string.Empty)
+{   
+    <MudText>Error: @commandErrorMsg</MudText>
+}
+<MudTextField T="string" @bind-Value="command" Placeholder="Command goes here"></MudTextField>
+<MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => SendCommand()" Style="margin:5px">Send</MudButton>
+            
 @code {
 
 
@@ -156,6 +162,9 @@
     [Parameter] public EventCallback<FireMissileEventArgs> OnFireMissile { get; set; }
     [Parameter] public EventCallback<MissileLandEventArgs> OnMissileLanded { get; set; }
     [Parameter] public int mementoMemory { get; set; }
+
+    public string commandErrorMsg { get; set; } = string.Empty;
+    public string command { get; set; } = string.Empty;
 
     List<bool?[]> HitMap;
 
@@ -194,6 +203,47 @@
         actualMap = new ActualMap();
     }
 
+    public void SendCommand()
+    {
+        try
+        {
+            List<string> inputs = command.Split(' ').ToList();
+            if (inputs.Count != 2)
+            {
+                HandleInterpreterError();
+                return;
+            }
+
+            ExpressionFactory factory = new ExpressionFactory();
+
+            Expression coords = factory.GetExpression(inputs[1]);
+            Expression action = factory.GetExpression(inputs[0], coords, FireMissile, PlaceShip);
+
+            if(coords is NullExpression || action is NullExpression)
+            {
+                HandleInterpreterError();
+                return;
+            }
+
+            action.Execute();
+
+            commandErrorMsg = string.Empty;
+            command = string.Empty;
+        }
+        catch (ArgumentException ex)
+        {
+            HandleInterpreterError(ex.Message);
+            return;
+        }
+        StateHasChanged();
+    }
+
+    public void HandleInterpreterError(string opt = "", string msg = "Expressions should be: 'COMMAND' 'COORDINATES'. Coordinates format: 'x,y' (e.g. '0,2')")
+    {
+        commandErrorMsg = opt + ". " + msg;
+        StateHasChanged();
+    }
+
     public void OnClickGridPaper(int x, int y, bool isShooting)
     {
         if(gamePhase == GamePhase.LAYOUT && !isShooting)
@@ -223,6 +273,7 @@
 
     public void FireMissile(int x, int y)
     {
+        Console.WriteLine("Invoke");
         IsMyTurn = false;
         FireMissileEventArgs args = new FireMissileEventArgs();
         args.X = x;
