@@ -1,0 +1,17 @@
+﻿@using BattleShipV3.Client.DesignPatterns.Lab2.State;
+
+
+@code {
+    private State state = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    public void TransitionTo(State state)
+    {
+        this.state = state;
+        this.state.SetContext(this);
+    }
+}
