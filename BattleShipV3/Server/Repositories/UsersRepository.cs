@@ -1,4 +1,5 @@
 ﻿using BattleShipV3.Models;
+using BattleShipV3.Server.Mediator;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -6,14 +7,14 @@ namespace BattleShipV3.Server.Repositories
 {
     public interface IUsersRepository
     {
-        Task CreateUserAsync(User user);
+        Task<User> CreateUserAsync(User user);
         Task DeleteUserAsync(User user);
         Task<IReadOnlyList<User>> GetAllUsersAsync();
         Task<User?> GetUserAsync(int? userId, string? email = null);
         Task UpdateUserAsync(User user);
     }
 
-    public class UsersRepository : IUsersRepository
+    public class UsersRepository : BaseComponent, IUsersRepository
     {
         private readonly BattleshipDbContext _battleshipDbContext;
 
@@ -39,10 +40,11 @@ namespace BattleShipV3.Server.Repositories
             }
         }
 
-        public async Task CreateUserAsync(User user)
+        public async Task<User> CreateUserAsync(User user)
         {
             _battleshipDbContext.Users.Add(user);
             await _battleshipDbContext.SaveChangesAsync();
+            return user;
         }
 
         public async Task UpdateUserAsync(User user)

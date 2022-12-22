@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Proxy
 {
-    public interface Proxy
+    public interface IProxy
     {
         bool Access(string name);
     }

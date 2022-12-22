@@ -56,7 +56,7 @@
 </MudTable>
 <br />
 @*proxy*@
-@if (secureNestProxy.Access(Global.CurrentUser.Name) && Global.CurrentUser.Name != null)
+@if (Global.CurrentUser != null && secureNestProxy.Access(Global.CurrentUser.Name) && Global.CurrentUser.Name != null)
 {
     @*chain*@
     <MudText>@PurchaseInfo(purchaseType.ToString())</MudText>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BattleShipV3.Shared.Visitoras.Visitor
 {
-    public class TaxVisitor : Visitor
+    public class TaxVisitor : IVisitor
     {
         public double visit(CashPurchase cashPurchase)
         {
