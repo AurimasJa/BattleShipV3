@@ -55,7 +55,11 @@
 <MudButton Color="Color.Secondary" Variant="Variant.Filled" Disabled="!isShipAdded" 
     @onclick="UndoSelectShip" Style="margin:5px">Undo</MudButton>
 
-    x
+    
+<MudText>Amount of owned Basic ships: @countOfBasics</MudText>
+<MudText>Amount of owned Healers: @countOfHealers</MudText>
+<MudText>Amount of owned Submarines: @countOfSubmarines</MudText>
+
 @if(composite != null)
 {
     @foreach (var group in composite.GetChildren())
@@ -92,9 +96,6 @@
 }
 
 
-
-
-
 @code {
     List<Ship> selectedShips { get; set; }
     List<Ship> ownedShips { get; set; }
@@ -113,6 +114,10 @@
 
     Composite composite { get; set; }
 
+    int countOfSubmarines { get; set; } = 0;
+    int countOfHealers { get; set; } = 0;
+    int countOfBasics { get; set; } = 0;
+
     protected override async Task OnInitializedAsync()
     {
         command = new SelectShipCommand(shipService, userShipService);
@@ -127,18 +132,32 @@
         facade = new Facade(userShipService, shipService, null);
         //var compositeIterator = new Composite();
         BuildComposite();
-
-        foreach (var item in composite.GetChildren())
-        {
-            foreach (var ship in ((Composite)item).GetChildren())
-            {
-                Console.WriteLine(((Ship)ship).Length);
-            }
-        }
-
+        CountShipTypes();
         await InvokeAsync(StateHasChanged);
         StateHasChanged();
     }
+
+    protected void CountShipTypes()
+    {
+        foreach (var item in composite)
+        {
+            Console.WriteLine(item.GetType());
+            Ship ship = (Ship)item;
+            switch(ship)
+            {
+                case Healer:
+                    countOfHealers++;
+                    break;
+                case Submarine:
+                    countOfSubmarines++;
+                    break;
+                default:
+                    countOfBasics++;
+                    break;
+            }
+        }
+    }
+
 
     protected async Task UndoSelectShip()
     {

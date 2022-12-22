@@ -11,7 +11,8 @@ namespace BattleShipV3.Shared.Iterator
     public class CompositeIterator : Iterator
     {
         private Composite _collection;
-
+        private Component _current;
+        private List<Component> _components;
         // Stores the current traversal position. An iterator may have a lot of
         // other fields for storing iteration state, especially when it is
         // supposed to work with a particular kind of collection.
@@ -21,9 +22,11 @@ namespace BattleShipV3.Shared.Iterator
 
         public CompositeIterator(Composite collection, bool reverse = false)
         {
+            Console.WriteLine("BUILDING");
             _collection = collection;
             _reverse = reverse;
-
+            _components = new List<Component>();
+            BuildList(_collection, _components);
             if (reverse)
             {
                 _position = collection.GetChildren().Count();
@@ -32,25 +35,26 @@ namespace BattleShipV3.Shared.Iterator
 
         public override object Current()
         {
-            Component temp = _collection;
-            while (temp.IsComposite())
-            {
-                temp = _collection.GetChildren();
-            }
+            return _components.ElementAt(_position);
+        }
 
-            foreach (var item in _collection.GetChildren())
+        private void BuildList(Component root, List<Component> components)
+        {
+            if (((Composite)root).GetChildren() != null && ((Composite)root).GetChildren().Any())
             {
-                foreach (var ship in ((Composite)item).GetChildren())
+                var items = ((Composite)root).GetChildren();
+                if (items.FirstOrDefault().IsComposite())
                 {
-                    
+                    foreach (var item in items)
+                    {
+                        BuildList(item, components);
+                    }
+                }
+                else
+                {
+                    components.AddRange(items);
                 }
             }
-            if (_collection.IsComposite())
-            {
-                
-                MoveNext();
-            }
-            return _collection.GetChildren().ElementAt(_position);
         }
 
         public override int Key()
@@ -60,10 +64,9 @@ namespace BattleShipV3.Shared.Iterator
 
         public override bool MoveNext()
         {
-            
             int updatedPosition = _position + (_reverse ? -1 : 1);
 
-            if (updatedPosition >= 0 && updatedPosition < _collection.GetChildren().Count())
+            if (updatedPosition >= 0 && updatedPosition < _components.Count())
             {
                 _position = updatedPosition;
                 return true;
