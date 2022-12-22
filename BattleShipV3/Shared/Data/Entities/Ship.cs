@@ -7,6 +7,7 @@ using static BattleShipV3.Data.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using BattleShipV3.Client.DesignPatterns;
 using System.ComponentModel;
+using System.Collections;
 
 namespace BattleShipV3.Data.Models
 {
@@ -45,6 +46,9 @@ namespace BattleShipV3.Data.Models
         {
             this.Color = this.ColorChanger.ChangeShipColor();
         }
-
+        public override bool IsComposite()
+        {
+            return false;
+        }
     }
 }

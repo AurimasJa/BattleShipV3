@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using BattleShipV3.Shared.Iterator;
+using System.Collections;
 
 namespace BattleShipV3.Client.DesignPatterns.Lab2.Composite
 {
-    public class Composite : Component
-    {
+    public class Composite : Component, IEnumerable
+    {   
         protected List<Component> children { get; set; } = new List<Component>();
-
+        bool _direction = false;
         public override void Add(Component component)
         {
             children.Add(component);
@@ -22,6 +23,11 @@ namespace BattleShipV3.Client.DesignPatterns.Lab2.Composite
             {
                 yield return item;
             }
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return new CompositeIterator(this, _direction);
         }
     }
 }

@@ -6,6 +6,7 @@
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared
 @using BattleShipV3.Shared.Data.Commands.UserShips.Create
+@using BattleShipV3.Shared.Iterator
 @using MudBlazor
 @using MudBlazor.ThemeManager
 
@@ -124,7 +125,7 @@
         selectedShips = await shipService.GetShipsByUserAsync(Global.CurrentUser.Id, true);
 
         facade = new Facade(userShipService, shipService, null);
-
+        //var compositeIterator = new Composite();
         BuildComposite();
 
         foreach (var item in composite.GetChildren())
