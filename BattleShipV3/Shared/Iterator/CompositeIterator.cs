@@ -28,7 +28,7 @@ namespace BattleShipV3.Shared.Iterator
             BuildList(_collection, _components);
             if (reverse)
             {
-                _position = collection.GetChildren().Count();
+                _position = _components.Count();
             }
         }
 
