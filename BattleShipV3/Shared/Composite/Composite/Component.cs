@@ -1,4 +1,6 @@
-﻿namespace BattleShipV3.Client.DesignPatterns.Lab2.Composite
+﻿using BattleShipV3.Shared.Iterator;
+
+namespace BattleShipV3.Client.DesignPatterns.Lab2.Composite
 {
     public abstract class Component
     {
