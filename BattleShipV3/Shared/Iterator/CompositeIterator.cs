@@ -22,7 +22,6 @@ namespace BattleShipV3.Shared.Iterator
 
         public CompositeIterator(Composite collection, bool reverse = false)
         {
-            Console.WriteLine("BUILDING");
             _collection = collection;
             _reverse = reverse;
             _components = new List<Component>();
