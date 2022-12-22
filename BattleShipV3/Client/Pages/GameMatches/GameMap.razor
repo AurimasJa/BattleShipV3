@@ -2,6 +2,7 @@
 @using BattleShipV3.Client.DesignPatterns
 @using BattleShipV3.Client.DesignPatterns.Bridge
 @using BattleShipV3.Client.DesignPatterns.Command
+@using BattleShipV3.Client.DesignPatterns.Memento
 @using BattleShipV3.Client.DesignPatterns.Prototype
 @using BattleShipV3.Data.Models
 @using BattleShipV3.Shared.Data.Models
@@ -98,9 +99,15 @@
                 Disabled="PlacedShips.Contains(item)" Style="margin:5px">@(item.Name + " " + item.Length)</MudButton>
         }
 
-        <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
-            Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
+        //Memento----------
+            <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => UndoMemento()"
+                Disabled="PlacedShips.Count == 4 || mementoMemory == 0" Style="margin:5px">Undo</MudButton>
+            <br/>
+        //Memento----------
 
+
+                    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => IsRotated(selectedShip)"
+            Disabled="selectedShip == null" Style="margin:5px">Rotate</MudButton>
         <br />
 
         <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="() => ChangeShipColor(selectedShip, ShipColor.ORANGE)"
@@ -148,11 +155,21 @@
     [Parameter] public EventCallback OnShipPhaseEnded { get; set; }
     [Parameter] public EventCallback<FireMissileEventArgs> OnFireMissile { get; set; }
     [Parameter] public EventCallback<MissileLandEventArgs> OnMissileLanded { get; set; }
+    [Parameter] public int mementoMemory { get; set; }
 
     List<bool?[]> HitMap;
 
     //[Parameter] public BattleShipV3.Models.User User { get; set; }
     //[Parameter] public List< Player { get; set; }
+
+
+    //Memento----------
+
+
+    public static MementoOriginator originator = new MementoOriginator("Super-duper-super-puper-super.", -1,-1,-1);
+    Caretaker caretaker = new Caretaker(originator);
+    //Memento----------
+
 
 
     Ship selectedShip;
@@ -168,7 +185,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-
         HitMap = new List<bool?[]>();
         for(int i = 0; i < 10; i ++)
         {
@@ -238,6 +254,7 @@
         StateHasChanged();
     }
 
+
     public void SelectShip(Ship context)
     {
         this.selectedShip = context;
@@ -278,6 +295,41 @@
         return false;
     }
 
+
+    //Memento----------
+
+
+    public void UndoMemento()
+    {
+        List<int> Mementocoords = new List<int>();
+        caretaker.ShowHistory();
+        mementoMemory = caretaker.GetAmount();
+        Console.WriteLine("MementosAmount: "+ mementoMemory);
+        Mementocoords = caretaker.Undo();
+
+        var ship = PlacedShips.FirstOrDefault(n => Mementocoords.ElementAt(0) == n.Length);
+        for (int i = 0; i < Mementocoords.ElementAt(0); i++)
+        {
+            if (ship.Rotation ==  ShipRotation.HORIZONTAL)
+            {
+                actualMap.playField[Mementocoords.ElementAt(1) + i][Mementocoords.ElementAt(2)].squareType = SquareType.NONE;
+            }
+            else
+            {
+                actualMap.playField[Mementocoords.ElementAt(1)][Mementocoords.ElementAt(2) + i].squareType = SquareType.NONE;
+            }
+        }
+        
+
+        PlacedShips.RemoveAt(PlacedShips.Count() - 1);
+        Console.WriteLine("testas placedships: " + PlacedShips.Count());
+        
+        mementoMemory = caretaker.GetAmount();
+    }
+
+    
+    //Memento----------
+
     public void PlaceShip(int x, int y)
     {
         if (selectedShip is null)
@@ -292,6 +344,14 @@
         if (actualMap.IsShipPlaced(selectedShip, x, y))
         {
             PlacedShips.Add(selectedShip);
+            
+            //Memento----------
+            caretaker.Backup(selectedShip.Length, x, y);
+            originator.DoSomething();
+            
+            mementoMemory = caretaker.GetAmount();
+            //StateHasChanged();
+            //Memento----------
             selectedShip = null;
         }
 
@@ -428,7 +488,7 @@
             }
             return true;
         }
-
+        
         public void AssignShip(Ship ship, int x, int y)
         {
             playField[x][y].AssignShip(ship);
