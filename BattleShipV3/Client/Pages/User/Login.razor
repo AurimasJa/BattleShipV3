@@ -1,5 +1,6 @@
 ﻿@page "/login"
 
+@using BattleShipV3.Client.DesignPatterns.Lab2.StateDesign
 @using BattleShipV3.Client.DesignPatterns.Singleton
 @using BattleShipV3.Shared.Data.Commands.User.Create
 @using Microsoft.AspNetCore.SignalR.Client
@@ -14,7 +15,27 @@
 @*@using BattleShipV3.Server*@
 
 @inject UserService userService
+<MudButton @onclick="ChangeToLargeImage">Large Image</MudButton>
+<MudButton @onclick="ChangeToMediumImage">Medium Image</MudButton>
+<MudButton @onclick="ChangeToSmallImage">Small Image</MudButton>
+<MudButton @onclick="ChangeToNoImage">No Image</MudButton>
 
+@if (_state is LargeImageState)
+{
+    <img src="/Screenshot_1.png" />
+}
+else if (_state is SmallImageState)
+{
+    <img src="/Screenshot_3.png" />
+}
+else if (_state is MediumImageState)
+{
+    <img src="/Screenshot_2.png"/>
+}
+else
+{
+    <MudText Typo="Typo.h3">No image to display</MudText>
+}
 
 <MudContainer Class="mt-12" MaxWidth="MaxWidth.Small">
     <MudPaper Elevation="2" Class="pa-4" Style="height: 400px;">
@@ -45,6 +66,7 @@
 @code {
     string _email { get; set; }
     string _password { get; set; }
+    IState _state = new LargeImageState();
 
     private HubConnection? hubConnection;
 
@@ -57,7 +79,25 @@
 
         await hubConnection.StartAsync();
     }
+    private void ChangeToLargeImage()
+    {
+        _state = new LargeImageState();
+    }
 
+    private void ChangeToSmallImage()
+    {
+        _state = new SmallImageState();
+    }
+
+    private void ChangeToMediumImage()
+    {
+        _state = new MediumImageState();
+    }
+
+    private void ChangeToNoImage()
+    {
+        _state = new NoImageState();
+    }
     protected async Task LoginUser()
     {
         if (UserIsValid())

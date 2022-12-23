@@ -2,14 +2,14 @@
 
 
 @code {
-    private State state = null;
+    private State1 state = null;
 
     protected override async Task OnInitializedAsync()
     {
 
     }
 
-    public void TransitionTo(State state)
+    public void TransitionTo(State1 state)
     {
         this.state = state;
         this.state.SetContext(this);
